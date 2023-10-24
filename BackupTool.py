@@ -1,12 +1,13 @@
 import sys
 import threading
 import json
+import wx
 from TempHistory import TempHistory
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
-from BackupGUI import GUI
+from BackupGUI import BackupGUI
 
-class BackupTool:
+class BackupTool(wx.App):
     def main(self):
         self.backup_configs = []
         self.backup_threads = []
@@ -70,8 +71,10 @@ class BackupTool:
                 else: print("Invalid command")
                 if self.stop_backup_tool: break
         else:
-            gui = GUI(0)
-            gui.MainLoop()
+            app = wx.App()
+            frame = BackupGUI(None, wx.ID_ANY, "")
+            frame.Show()
+            app.MainLoop()
 
     def add_or_remove_config(self, config_path, configs):
         if config_path is None:

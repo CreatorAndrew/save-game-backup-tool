@@ -3,3 +3,10 @@ copy MasterConfig.json dist\BackupTool
 copy Test.json dist\BackupTool
 copy Bully.json dist\BackupTool
 robocopy Test dist\BackupTool\Test /e
+cd dist
+rename BackupTool "Save Game Backup Tool"
+7z a save-game-backup-tool-win32-amd64.zip "Save Game Backup Tool"
+cd ..
+rmdir /s dist
+rmdir /s build
+del BackupTool.spec
