@@ -1,7 +1,9 @@
+import os
 import sys
 import threading
 import json
 import wx
+import subprocess
 from TempHistory import TempHistory
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
@@ -9,6 +11,9 @@ from BackupGUI import BackupGUI
 
 class BackupTool(wx.App):
     def main(self):
+        if os.name == "posix": subprocess.run("clear")
+        elif os.name == "nt": subprocess.run("cls")
+
         self.backup_configs = []
         self.backup_threads = []
         self.configs_used = []
