@@ -12,7 +12,6 @@ from BackupGUI import BackupGUI
 class BackupTool(wx.App):
     def main(self):
         if os.name == "posix": subprocess.run("clear")
-        elif os.name == "nt": subprocess.run("cls")
 
         self.backup_configs = []
         self.backup_threads = []
