@@ -3,4 +3,5 @@ cp MasterConfig.json dist/BackupTool
 cp Test.json dist/BackupTool
 cp Bully.json dist/BackupTool
 cp -r Test dist/BackupTool/Test
-7z a Save\ Game\ Backup\ Tool.zip ./dist/BackupTool/*
+mv ./dist/BackupTool ./dist/Save\ Game\ Backup\ Tool
+7z a save-game-backup-tool-linux-amd64.zip ./dist/Save\ Game\ Backup\ Tool/

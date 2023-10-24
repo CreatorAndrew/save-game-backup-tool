@@ -5,4 +5,5 @@ cp Bully.json dist
 cp *.command dist
 cp -r Test dist/Test
 rm -rf dist/BackupTool
-7z a Save\ Game\ Backup\ Tool.zip ./dist/*
+mv ./dist ./Save\ Game\ Backup\ Tool
+7z a save-game-backup-tool-darwin-universal2.zip ./Save\ Game\ Backup\ Tool
