@@ -29,9 +29,7 @@ class BackupTool(wx.App):
             elif arg.lower() == "--skip-choice": skip_choice = True
         if skip_choice:
             for config in configs:
-                if config["name"] == default_config_name:
-                    config_path = config["file"]
-                    print(config_path)
+                if config["name"] == default_config_name: config_path = config["file"]
         index = 0
         while index < len(sys.argv) and not skip_choice:
             if sys.argv[index].lower() == "--config" and index < len(sys.argv) - 1:
@@ -43,7 +41,7 @@ class BackupTool(wx.App):
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig(path = config_path))
+                self.backup_configs.append(BackupConfig(name = "Single Config", path = config_path))
                 self.backup_threads.append(threading.Thread(target = self.backup_configs[0].watchdog,
                                                             args = (self.stop_queue,)))
                 self.backup_threads[0].start()
