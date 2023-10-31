@@ -1,4 +1,3 @@
-import os
 import sys
 import threading
 import json
@@ -11,7 +10,7 @@ from BackupGUI import BackupGUI
 
 class BackupTool(wx.App):
     def main(self):
-        if os.name == "posix": subprocess.run("clear")
+        if sys.platform == "darwin": subprocess.run("clear")
 
         self.backup_configs = []
         self.backup_threads = []
@@ -45,7 +44,8 @@ class BackupTool(wx.App):
             self.stop_backup_tool = False
             if config_path is not None:
                 self.backup_configs.append(BackupConfig(path = config_path))
-                self.backup_threads.append(threading.Thread(target = self.backup_configs[0].watchdog))
+                self.backup_threads.append(threading.Thread(target = self.backup_configs[0].watchdog,
+                                                            args = (self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print("Enter in \"help\" or \"?\" for assistance.")
             while config_path is None:
