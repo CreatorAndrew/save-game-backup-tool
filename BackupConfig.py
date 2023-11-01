@@ -1,13 +1,16 @@
+from __future__ import with_statement
+from __future__ import absolute_import
 import os
 import json
+from io import open
 from BackupWatchdog import BackupWatchdog
 
-class BackupConfig:
+class BackupConfig(object):
     def __init__(self, name = None, path = None, use_prompt = False):
         if name is None: return
         self.name = name
         self.config_path = path
-        self.stop_backup_file = backup_watchdog.replace_local_dot_directory("./.stop" + self.config_path.replace(".json", ""))
+        self.stop_backup_file = backup_watchdog.replace_local_dot_directory(u"./.stop" + self.config_path.replace(u".json", u""))
         self.stop = False
         self.use_prompt = use_prompt
 
@@ -18,11 +21,8 @@ class BackupConfig:
             self.stop = True
             while os.path.exists(self.stop_backup_file): os.remove(self.stop_backup_file)
 
-    def disable(self):
-        with open(self.stop_backup_file, "w") as write_file: pass
-
     def get_configs(self):
-        with open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r") as read_file:
-            return json.load(read_file)["configurations"]
+        with open(backup_watchdog.replace_local_dot_directory(u"./MasterConfig.json"), u"r") as read_file:
+            return json.load(read_file)[u"configurations"]
 
 backup_watchdog = BackupWatchdog()
