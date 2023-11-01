@@ -1,6 +1,7 @@
 import threading
 import wx
 from BackupConfig import BackupConfig
+
 class BackupGUI(wx.Frame):
     def __init__(self, *args, **kwds):
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE

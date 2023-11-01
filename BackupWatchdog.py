@@ -30,8 +30,8 @@ class BackupWatchdog:
 
         config_file = self.replace_local_dot_directory("./" + config_file)
 
-        with open(config_file, "r") as readFile:
-            data = json.load(readFile)
+        with open(config_file, "r") as read_file:
+            data = json.load(read_file)
             for save_path in data["searchableSavePaths"]:
                 save_paths.append(save_path)
             if data["backupPath"]["isAbsolute"].lower() == "true": home = ""
@@ -75,8 +75,7 @@ class BackupWatchdog:
 
                 # Update the JSON file
                 data["lastBackupTime"] = last_backup_time
-                with open(config_file, "w") as write_file:
-                    json.dump(data, write_file, indent = 4)
+                with open(config_file, "w") as write_file: json.dump(data, write_file, indent = 4)
         # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
         except FileNotFoundError: pass
         except FileExistsError:
