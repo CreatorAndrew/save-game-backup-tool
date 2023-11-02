@@ -1,0 +1,7 @@
+numpy==1.16.1
+pathlib2==2.3.7.post1
+Pillow==6.2.2
+scandir==1.10.0
+six==1.16.0
+typing==3.10.0.0
+wxPython==4.0.7
