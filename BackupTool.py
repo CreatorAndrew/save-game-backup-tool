@@ -98,7 +98,7 @@ class BackupTool(wx.App):
         return config
 
     def quit(self):
-        for backup_config in self.backup_configs: 
+        for backup_config in self.backup_configs:
             self.stop_queue.append(backup_config.name)
             while not backup_config.stop: pass
         self.stop_queue = []

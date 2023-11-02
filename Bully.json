@@ -2,24 +2,24 @@
     "searchableSavePaths": [
         {
             "path": "Documents/Bully Scholarship Edition/FileTableBully",
-            "isAbsolute": "false"
+            "isAbsolute": false
         },
         {
             "path": "OneDrive/Documents/Bully Scholarship Edition/FileTableBully",
-            "isAbsolute": "false"
+            "isAbsolute": false
         },
         {
             "path": ".local/share/Steam/steamapps/compatdata/12200/pfx/drive_c/users/steamuser/Documents/Bully Scholarship Edition/FileTableBully",
-            "isAbsolute": "false"
+            "isAbsolute": false
         },
         {
             "path": ".steam/steam/steamapps/compatdata/12200/pfx/drive_c/users/steamuser/Documents/Bully Scholarship Edition/FileTableBully",
-            "isAbsolute": "false"
+            "isAbsolute": false
         }
     ],
     "backupPath": {
         "path": "./Bully Backups",
-        "isAbsolute": "true"
+        "isAbsolute": true
     },
     "backupFileNamePrefix": "bully",
     "lastBackupTime": 0
