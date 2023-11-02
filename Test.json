@@ -2,12 +2,12 @@
     "searchableSavePaths": [
         {
             "path": "./Test/Test.txt",
-            "isAbsolute": "true"
+            "isAbsolute": true
         }
     ],
     "backupPath": {
         "path": "./Test Backups",
-        "isAbsolute": "true"
+        "isAbsolute": true
     },
     "backupFileNamePrefix": "test",
     "lastBackupTime": 0
