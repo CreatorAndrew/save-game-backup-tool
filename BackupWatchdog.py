@@ -74,7 +74,7 @@ class BackupWatchdog:
                                 path = os.path.join(folder, file)
                                 backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
                         if os.path.exists(backup_folder + backup): print(self.add_text_to_text_area("Backup successful", text_area))
-                        if text_area is None and use_prompt: print(self.prompt, end="", flush=True)
+                if text_area is None and use_prompt: print(self.prompt, end="", flush=True)
                 # Update the JSON file
                 data["lastBackupTime"] = last_backup_time
                 with open(config_file, "w") as write_file: json.dump(data, write_file, indent=4)
