@@ -45,21 +45,19 @@ class BackupTool(wx.App):
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig(name = u"Single Config", path = config_path))
-                self.backup_threads.append(threading.Thread(target = self.backup_configs[0].watchdog,
-                                                            args = (self.stop_queue,)))
+                self.backup_configs.append(BackupConfig(name=u"Single Config", path=config_path))
+                self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print(u"Enter in \"help\" or \"?\" for assistance.")
             while config_path is None:
-                print(backup_watchdog.prompt, end = u"")
+                print(backup_watchdog.prompt, end=u"")
                 choice = input()
                 if choice == u"start":
                     config = self.add_or_remove_config(config_path, configs)
                     if config not in self.configs_used:
                         self.configs_used.append(config)
-                        self.backup_configs.append(BackupConfig(name = config[u"name"], path = config[u"file"], use_prompt = True))
-                        self.backup_threads.append(threading.Thread(target = self.backup_configs[len(self.backup_configs) - 1].watchdog,
-                                                                    args = (self.stop_queue,)))
+                        self.backup_configs.append(BackupConfig(name=config[u"name"], path=config[u"file"], use_prompt=True))
+                        self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog, args=(self.stop_queue,)))
                         self.backup_threads[len(self.backup_threads) - 1].start()
                     else: print(u"That configuration is already in use.")
                 elif choice == u"stop":
@@ -67,7 +65,7 @@ class BackupTool(wx.App):
                     if config in self.configs_used:
                         self.stop_queue.append(self.backup_configs[self.configs_used.index(config)].name)
                         self.backup_threads[self.configs_used.index(config)].join()
-                        while not self.backup_configs[self.configs_used.index(config)].stop: pass 
+                        while not self.backup_configs[self.configs_used.index(config)].stop: pass
                         self.stop_queue.remove(self.backup_configs[self.configs_used.index(config)].name)
                         self.backup_configs.remove(self.backup_configs[self.configs_used.index(config)])
                         self.configs_used.remove(config)
@@ -92,7 +90,7 @@ class BackupTool(wx.App):
             choice = None
             while choice is None: 
                 try:
-                    print(u"Enter in an option number here: ", end = u"")
+                    print(u"Enter in an option number here: ", end=u"")
                     choice = int(input())
                     if choice >= len(configs) or choice < 0:
                         print(u"Not a valid option number. Try again.")

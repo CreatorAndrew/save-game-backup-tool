@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys
 import platform
 
-if platform.system() == u'Windows':
+if platform.system() == u"Windows":
     try: import colorama
     except ImportError:
         import ctypes
@@ -14,44 +14,44 @@ else: import readline
 
 class TempHistory(object):
     def __init__(self):
-        self.line = u'\n'
+        self.line = u"\n"
         self.builtin_print = print
         self.builtin_input = raw_input
 
     def _record(self, text):
-        if text == u'': return
-        lines = text.split(u'\n')
-        if text[-1] == u'\n': last_line = lines[-2] + u'\n'
+        if text == u"": return
+        lines = text.split(u"\n")
+        if text[-1] == u"\n": last_line = lines[-2] + u"\n"
         else: last_line = lines[-1]
-        last_line = last_line.split(u'\r')[-1]
-        if self.line[-1] == u'\n': self.line = last_line
+        last_line = last_line.split(u"\r")[-1]
+        if self.line[-1] == u"\n": self.line = last_line
         else: self.line += last_line
 
     def _undo_newline(self):
         line_length = len(self.line)
         for i, char in enumerate(self.line[1:]):
-            if char == u'\b' and self.line[i-1] != u'\b': line_length -= 2
-        self.print(u'\x1b[{}C\x1b[1A'.format(line_length), end = u'', flush = True, record = False)
+            if char == u"\b" and self.line[i-1] != u"\b": line_length -= 2
+        self.print(u"\x1b[{}C\x1b[1A".format(line_length), end=u"", flush=True, record=False)
 
     def print(self, *args, **_3to2kwargs):
-        if 'record' in _3to2kwargs: record = _3to2kwargs['record']; del _3to2kwargs['record']
+        if "record" in _3to2kwargs: record = _3to2kwargs["record"]; del _3to2kwargs["record"]
         else: record = True
-        if 'flush' in _3to2kwargs: flush = _3to2kwargs['flush']; del _3to2kwargs['flush']
+        if "flush" in _3to2kwargs: flush = _3to2kwargs["flush"]; del _3to2kwargs["flush"]
         else: flush = False
-        if 'file' in _3to2kwargs: file = _3to2kwargs['file']; del _3to2kwargs['file']
+        if "file" in _3to2kwargs: file = _3to2kwargs["file"]; del _3to2kwargs["file"]
         else: file = sys.stdout
-        if 'end' in _3to2kwargs: end = _3to2kwargs['end']; del _3to2kwargs['end']
-        else: end = u'\n'
-        if 'sep' in _3to2kwargs: sep = _3to2kwargs['sep']; del _3to2kwargs['sep']
-        else: sep = u' '
-        self.builtin_print(*args, sep = sep, end = end, file = file)
+        if "end" in _3to2kwargs: end = _3to2kwargs["end"]; del _3to2kwargs["end"]
+        else: end = u"\n"
+        if "sep" in _3to2kwargs: sep = _3to2kwargs["sep"]; del _3to2kwargs["sep"]
+        else: sep = u" "
+        self.builtin_print(*args, sep=sep, end=end, file=file)
         if flush: sys.stdout.flush()
         if record:
             text = sep.join([unicode(arg) for arg in args]) + end
             self._record(text)
 
-    def input(self, prompt = u'', newline = True, record = True):
-        if prompt == u'': prompt = u' \b'
+    def input(self, prompt=u"", newline=True, record=True):
+        if prompt == u"": prompt = u" \b"
         response = self.builtin_input(prompt)
         if record:
             self._record(prompt)
