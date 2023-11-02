@@ -13,7 +13,6 @@ class BackupGUI(wx.Frame):
         self.panel = wx.Panel(self, wx.ID_ANY)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-
         grid = wx.GridSizer(len(configs), 2, 0, 0)
         sizer.Add(grid, 0, wx.EXPAND, 0)
 
@@ -29,30 +28,24 @@ class BackupGUI(wx.Frame):
             button_grid_height += self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
             index += 1
 
-        self.text_ctrl = wx.TextCtrl(self.panel, wx.ID_ANY, "", style = wx.TE_MULTILINE | wx.TE_READONLY)
+        self.text_ctrl = wx.TextCtrl(self.panel, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
         sizer.Add(self.text_ctrl, 2, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, 0)
-
         self.panel.SetSizer(sizer)
-
         if button_grid_height >= 0.75 * height: self.SetSize((width, int(button_grid_height + height * 2 / 3)))
         else: self.SetSize((width, height))
-
         self.SetMinSize(self.GetSize())
-
         self.Layout()
-
         self.Centre()
 
         for button in self.buttons: button.Bind(wx.EVT_BUTTON, self.handle_button)
-
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
         if configs[index] not in configs_used:
             configs_used.append(configs[index])
-            backup_configs.append(BackupConfig(name = configs[index]["name"], path = configs[index]["file"]))
-            backup_threads.append(threading.Thread(target = backup_configs[len(backup_configs) - 1].watchdog, args = (stop_queue, self.text_ctrl), daemon = True))
+            backup_configs.append(BackupConfig(name=configs[index]["name"], path=configs[index]["file"]))
+            backup_threads.append(threading.Thread(target=backup_configs[len(backup_configs) - 1].watchdog, args=(stop_queue, self.text_ctrl), daemon=True))
             backup_threads[len(backup_threads) - 1].start()
             self.buttons[index].SetLabel("Stop")
         else:
@@ -73,9 +66,9 @@ class BackupGUI(wx.Frame):
                 while not backup_configs[configs_used.index(configs[index])].stop: pass
                 index += 1
         except Exception: pass
-        stop_queue = []
         backup_configs = []
         configs_used = []
+        stop_queue = []
         self.Destroy()
 
 backup_threads = []
