@@ -60,13 +60,14 @@ class BackupWatchdog:
 
                 backup = backup_file_name_prefix + "+" + str(last_backup_time) + ".zip"
                 if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
+
+                if text_area is None and use_prompt: print("")
                 if os.path.exists(backup_folder + backup):
                     if backup_folder.endswith("/"): backup_folder = backup_folder[:len(backup_folder) - 2]
                     print(self.add_text_to_text_area(backup + " already exists in " + backup_folder + ".\nBackup cancelled", text_area))
                 else:
                     # Create the backup archive file
                     with ZipFile(backup_folder + backup, "w") as backup_archive:
-                        if text_area is None and use_prompt: print("")
                         print(self.add_text_to_text_area("Creating backup archive: " + backup, text_area))
                         for folder, subFolders, files in os.walk(save_folder):
                             for file in files:
