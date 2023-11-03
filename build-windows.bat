@@ -1,6 +1,6 @@
 pyinstaller -w BackupTool.py
 copy *.json dist\BackupTool
-copy BackupTool.bat
+copy BackupTool.bat dist\BackupTool
 copy LICENSE dist\BackupTool
 robocopy Test dist\BackupTool\Test /e
 move dist\BackupTool .\"Save Game Backup Tool"
