@@ -57,19 +57,13 @@ class BackupTool(wx.App):
                     if config not in self.configs_used:
                         self.configs_used.append(config)
                         self.backup_configs.append(BackupConfig(name=config[u"name"], path=config[u"file"], use_prompt=True))
-                        self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog, args=(self.stop_queue,)))
+                        self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
+                                                                    args=(self.stop_queue, None, self, config)))
                         self.backup_threads[len(self.backup_threads) - 1].start()
                     else: print(u"That configuration is already in use.")
                 elif choice == u"stop":
                     config = self.add_or_remove_config(config_path, configs)
-                    if config in self.configs_used:
-                        self.stop_queue.append(self.backup_configs[self.configs_used.index(config)].name)
-                        self.backup_threads[self.configs_used.index(config)].join()
-                        while not self.backup_configs[self.configs_used.index(config)].stop: pass
-                        self.stop_queue.remove(self.backup_configs[self.configs_used.index(config)].name)
-                        self.backup_configs.remove(self.backup_configs[self.configs_used.index(config)])
-                        self.configs_used.remove(config)
-                    else: print(u"That configuration was not in use.")
+                    self.remove_config(config)
                 elif choice == u"exit" or choice == u"quit" or choice == u"end": self.quit()
                 elif choice == u"help" or choice == u"?": help()
                 else: print(u"Invalid command")
@@ -79,6 +73,17 @@ class BackupTool(wx.App):
             frame = BackupGUI(None, wx.ID_ANY, u"")
             frame.Show()
             app.MainLoop()
+
+    def remove_config(self, config, join=True):
+        if config in self.configs_used:
+            self.stop_queue.append(self.backup_configs[self.configs_used.index(config)].name)
+            if join:
+                self.backup_threads[self.configs_used.index(config)].join()
+                while not self.backup_configs[self.configs_used.index(config)].stop: pass
+            self.stop_queue.remove(self.backup_configs[self.configs_used.index(config)].name)
+            self.backup_configs.remove(self.backup_configs[self.configs_used.index(config)])
+            self.configs_used.remove(config)
+        else: print(u"That configuration was not in use.")
 
     def add_or_remove_config(self, config_path, configs):
         if config_path is None:

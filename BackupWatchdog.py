@@ -26,7 +26,7 @@ class BackupWatchdog(object):
         if text_area is not None: wx.CallAfter(text_area.AppendText, text + u"\n")
         return text
 
-    def watchdog(self, config_file, text_area=None, use_prompt=False, enabled=True):
+    def watchdog(self, config_file, text_area=None, button_config=None, button_index=None, use_prompt=False, enabled=True):
         if not enabled: return
 
         save_paths = []
@@ -51,8 +51,13 @@ class BackupWatchdog(object):
                 save_path = temp_save_path
                 break
         if save_path is None:
-            print(u"No save file found")
-            sys.exit()
+            if text_area is None and use_prompt: print(u"")
+            print(self.add_text_to_text_area(u"No save file found", text_area))
+            if text_area is None and use_prompt: print(self.prompt, end=u"", flush=True)
+            if button_config is not None:
+                if text_area is None: button_config.remove_config(button_index, False)
+                else: wx.CallAfter(button_config.remove_config, button_index)
+            return True
         save_folder = save_path[:save_path.rindex(u"/") + 1]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
