@@ -45,17 +45,20 @@ class BackupGUI(wx.Frame):
         if configs[index] not in configs_used:
             configs_used.append(configs[index])
             backup_configs.append(BackupConfig(name=configs[index]["name"], path=configs[index]["file"]))
-            backup_threads.append(threading.Thread(target=backup_configs[len(backup_configs) - 1].watchdog, args=(stop_queue, self.text_ctrl), daemon=True))
+            backup_threads.append(threading.Thread(target=backup_configs[len(backup_configs) - 1].watchdog,
+                                                   args=(stop_queue, self.text_ctrl, self, index), daemon=True))
             backup_threads[len(backup_threads) - 1].start()
             self.buttons[index].SetLabel("Stop")
-        else:
-            stop_queue.append(backup_configs[configs_used.index(configs[index])].name)
-            backup_threads[configs_used.index(configs[index])].join()
-            while not backup_configs[configs_used.index(configs[index])].stop: pass
-            stop_queue.remove(backup_configs[configs_used.index(configs[index])].name)
-            backup_configs.remove(backup_configs[configs_used.index(configs[index])])
-            configs_used.remove(configs_used[configs_used.index(configs[index])])
-            self.buttons[index].SetLabel("Start")
+        else: self.remove_config(index)
+
+    def remove_config(self, index):
+        stop_queue.append(backup_configs[configs_used.index(configs[index])].name)
+        backup_threads[configs_used.index(configs[index])].join()
+        while not backup_configs[configs_used.index(configs[index])].stop: pass
+        stop_queue.remove(backup_configs[configs_used.index(configs[index])].name)
+        backup_configs.remove(backup_configs[configs_used.index(configs[index])])
+        configs_used.remove(configs_used[configs_used.index(configs[index])])
+        self.buttons[index].SetLabel("Start")
 
     def on_close(self, event):
         try:
@@ -73,7 +76,6 @@ class BackupGUI(wx.Frame):
 
 backup_threads = []
 backup_configs = []
-backup_config = BackupConfig()
-configs = backup_config.get_configs()
+configs = BackupConfig().get_configs()
 configs_used = []
 stop_queue = []

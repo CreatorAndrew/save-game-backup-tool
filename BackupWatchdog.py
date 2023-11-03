@@ -23,7 +23,7 @@ class BackupWatchdog:
         if text_area is not None: wx.CallAfter(text_area.AppendText, text + "\n")
         return text
 
-    def watchdog(self, config_file, text_area=None, use_prompt=False, enabled=True):
+    def watchdog(self, config_file, text_area=None, button_config=None, button_index=None, use_prompt=False, enabled=True):
         if not enabled: return
 
         save_paths = []
@@ -48,8 +48,13 @@ class BackupWatchdog:
                 save_path = temp_save_path
                 break
         if save_path is None:
-            print("No save file found")
-            sys.exit()
+            if text_area is None and use_prompt: print("")
+            print(self.add_text_to_text_area("No save file found", text_area))
+            if text_area is None and use_prompt: print(self.prompt, end="", flush=True)
+            if button_config is not None:
+                if text_area is None: button_config.remove_config(button_index, False)
+                else: wx.CallAfter(button_config.remove_config, button_index)
+            return True
         save_folder = save_path[:save_path.rindex("/") + 1]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
@@ -81,6 +86,7 @@ class BackupWatchdog:
                 with open(config_file, "w") as write_file: json.dump(data, write_file, indent=4)
         # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
         except FileNotFoundError: pass
+        return False
 
 temp_history = TempHistory()
 print = temp_history.print
