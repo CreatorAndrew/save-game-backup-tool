@@ -1,14 +1,13 @@
-pyinstaller --hide-console hide-early BackupTool.py
-copy MasterConfig.json dist\BackupTool
-copy Test.json dist\BackupTool
-copy Bully.json dist\BackupTool
+pyinstaller -w BackupTool.py
+copy *.json dist\BackupTool
+copy BackupTool.bat
 copy LICENSE dist\BackupTool
 robocopy Test dist\BackupTool\Test /e
-cd dist
-rename BackupTool "Save Game Backup Tool"
-7z a save-game-backup-tool-win32-amd64.zip "Save Game Backup Tool"
-move save-game-backup-tool-win32-amd64.zip ..
-cd ..
-rmdir /s dist
-rmdir /s build
+move dist\BackupTool .\"Save Game Backup Tool"
+pyinstaller BackupTool.py
+copy dist\BackupTool\BackupTool.exe "Save Game Backup Tool\BackupTool (Console).exe"
+7z a save-game-backup-tool-win32-i386.zip "Save Game Backup Tool"
+rmdir /s /q dist
+rmdir /s /q build
+rmdir /s /q "Save Game Backup Tool"
 del BackupTool.spec

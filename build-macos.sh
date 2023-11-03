@@ -1,7 +1,5 @@
 pyinstaller --noconsole --target-arch universal2 BackupTool.py
-cp MasterConfig.json dist
-cp Test.json dist
-cp Bully.json dist
+cp *.json dist
 cp LICENSE dist
 cp *.command dist
 cp -r Test dist/Test
