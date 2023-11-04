@@ -86,7 +86,6 @@ class BackupWatchdog:
                 with open(config_file, "w") as write_file: json.dump(data, write_file, indent=4)
         # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
         except FileNotFoundError: pass
-        return False
 
 temp_history = TempHistory()
 print = temp_history.print
