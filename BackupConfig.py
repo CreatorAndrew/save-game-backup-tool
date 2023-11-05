@@ -21,7 +21,7 @@ class BackupConfig:
                                             use_prompt=self.use_prompt): break
             self.stop = True
             if os.path.exists(self.stop_backup_file):
-                if text_ctrl is None: button_config.remove_config(button_index)
+                if text_ctrl is None: button_config.remove_config(button_index, False)
                 else: button_config.remove_config(button_index, False)
             while os.path.exists(self.stop_backup_file): os.remove(self.stop_backup_file)
 
