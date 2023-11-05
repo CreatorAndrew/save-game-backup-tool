@@ -1,5 +1,6 @@
 import os
 import json
+import wx
 from BackupWatchdog import BackupWatchdog
 
 class BackupConfig:
@@ -22,7 +23,7 @@ class BackupConfig:
             self.stop = True
             if os.path.exists(self.stop_backup_file):
                 if text_ctrl is None: button_config.remove_config(button_index, False)
-                else: button_config.remove_config(button_index, False)
+                else: wx.CallAfter(button_config.remove_config, button_index, False)
             while os.path.exists(self.stop_backup_file): os.remove(self.stop_backup_file)
 
     def get_configs(self):
