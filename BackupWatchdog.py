@@ -2,7 +2,6 @@ from __future__ import with_statement
 from __future__ import absolute_import
 from __future__ import print_function
 import os
-import sys
 import time
 import json
 import wx
@@ -19,8 +18,9 @@ class BackupWatchdog(object):
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
-        return path.replace(u"./", os.path.dirname(os.path.abspath(__file__))
-                            .replace(u"\\", u"/") + u"/").replace(u"/_internal", u"").replace(u"/BackupTool.app/Contents/Frameworks", u"")
+        return (path.replace(u"./", os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/") + u"/")
+                    .replace(u"/_internal", u"")
+                    .replace(u"/BackupTool.app/Contents/Frameworks", u""))
 
     def add_text_to_text_area(self, text, text_area=None):
         if text_area is not None: wx.CallAfter(text_area.AppendText, text + u"\n")
@@ -56,7 +56,7 @@ class BackupWatchdog(object):
             if text_area is None and use_prompt: print(self.prompt, end=u"", flush=True)
             if button_config is not None:
                 if text_area is None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index)
+                else: wx.CallAfter(button_config.remove_config, button_index, False)
             return True
         save_folder = save_path[:save_path.rindex(u"/") + 1]
 
