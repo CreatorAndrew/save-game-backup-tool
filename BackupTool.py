@@ -66,7 +66,7 @@ class BackupTool(wx.App):
                     self.remove_config(config)
                 elif choice == u"exit" or choice == u"quit" or choice == u"end": self.quit()
                 elif choice == u"help" or choice == u"?": help()
-                elif choice != "": print(u"Invalid command")
+                elif choice != u"": print(u"Invalid command")
                 if self.stop_backup_tool: break
         else:
             app = wx.App()
