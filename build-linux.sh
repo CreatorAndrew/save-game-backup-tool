@@ -1,5 +1,7 @@
 pyinstaller BackupTool.py
 cp *.json dist/BackupTool
+cp *.desktop dist/BackupTool
+cp *.ico dist/BackupTool
 cp LICENSE dist/BackupTool
 cp -r Test dist/BackupTool/Test
 mv ./dist/BackupTool ./dist/Save\ Game\ Backup\ Tool

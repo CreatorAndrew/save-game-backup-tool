@@ -11,6 +11,10 @@ from BackupGUI import BackupGUI
 class BackupTool(wx.App):
     def main(self):
         if sys.platform == "darwin": subprocess.run("clear")
+        if sys.platform == "linux":
+            with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "r") as read_file: lines = read_file.readlines()
+            for line in lines: lines[lines.index(line)] = backup_watchdog.replace_local_dot_directory(line)
+            with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w") as write_file: write_file.writelines(lines)
 
         self.backup_configs = []
         self.backup_threads = []
