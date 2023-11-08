@@ -1,5 +1,6 @@
 [Desktop Entry]
 Type=Application
+Categories=Game;Utility
 Name=Save Game Backup Tool
 Exec=./BackupTool
 Icon=./BackupTool.ico

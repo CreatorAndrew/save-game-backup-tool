@@ -1,8 +1,11 @@
+import os
 import sys
+import shutil
 import subprocess
 import threading
 import json
 import wx
+from pathlib import Path
 from TempHistory import TempHistory
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
@@ -11,12 +14,18 @@ from BackupGUI import BackupGUI
 class BackupTool(wx.App):
     def main(self):
         if sys.platform == "darwin": subprocess.run("clear")
-        if sys.platform == "linux":
+        if sys.platform == "linux" and os.path.exists(backup_watchdog.replace_local_dot_directory("./.BackupTool.desktop")):
+            shutil.copy(backup_watchdog.replace_local_dot_directory("./.BackupTool.desktop"),
+                        backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"))
             with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "r") as read_file: lines = read_file.readlines()
             for line in lines:
-                lines[lines.index(line)] = backup_watchdog.replace_local_dot_directory(line)
-                if "Exec=" in lines[lines.index(line)]: lines[lines.index(line)] = lines[lines.index(line)].replace(" ", "\\ ")
+                lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
+                if "Exec=" in line: lines[lines.index(line)] = line.replace(" ", "\\ ")
             with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w") as write_file: write_file.writelines(lines)
+            subprocess.run(["chmod", "+x", backup_watchdog.replace_local_dot_directory("./BackupTool.desktop")])
+            try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/.local/share/applications/BackupTool.desktop"))
+            except: pass
+            shutil.move(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), str(Path.home()) + "/.local/share/applications")
 
         self.backup_configs = []
         self.backup_threads = []
