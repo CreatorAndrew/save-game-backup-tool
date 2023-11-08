@@ -3,6 +3,7 @@ import time
 import json
 import wx
 import zipfile
+import subprocess
 from zipfile import ZipFile
 from pathlib import Path
 from TempHistory import TempHistory
@@ -16,7 +17,7 @@ class BackupWatchdog:
     def replace_local_dot_directory(self, path):
         return (path.replace("./", os.path.dirname(os.path.abspath(__file__)).replace("\\", "/") + "/")
                     .replace("/_internal", "")
-                    .replace("/BackupTool.app/Contents/Frameworks", ""))
+                    .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
 
     def add_text_to_text_area(self, text, text_area=None):
         if text_area is not None: wx.CallAfter(text_area.AppendText, text + "\n")

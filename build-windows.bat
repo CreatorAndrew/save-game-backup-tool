@@ -10,4 +10,3 @@ move save-game-backup-tool-win32-amd64.zip ..
 cd ..
 rmdir /s /q dist
 rmdir /s /q build
-del BackupTool.spec
