@@ -3,7 +3,6 @@ import time
 import json
 import wx
 import zipfile
-import subprocess
 from zipfile import ZipFile
 from pathlib import Path
 from TempHistory import TempHistory
