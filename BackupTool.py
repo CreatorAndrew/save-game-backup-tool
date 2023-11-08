@@ -39,7 +39,8 @@ class BackupTool(wx.App):
             shortcut.Targetpath = target
             shortcut.IconLocation = icon
             shortcut.save()
-            try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"))
+            try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) +
+                                                                       "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"))
             except: pass
             shutil.move(os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk"),
                         backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"))
