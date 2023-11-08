@@ -1,5 +1,7 @@
+import sys
 import threading
 import wx
+from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
 
 class BackupGUI(wx.Frame):
@@ -9,6 +11,7 @@ class BackupGUI(wx.Frame):
         width = 512
         height = 384
         self.SetTitle("Save Game Backup Tool")
+        if sys.platform != "darwin": self.SetIcon(wx.Icon(BackupWatchdog().replace_local_dot_directory("./BackupTool.ico")))
 
         self.panel = wx.Panel(self, wx.ID_ANY)
 

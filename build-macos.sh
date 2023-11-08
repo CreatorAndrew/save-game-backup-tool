@@ -1,4 +1,4 @@
-pyinstaller --noconsole --target-arch universal2 BackupTool.py
+pyinstaller --noconsole --target-arch universal2 --icon=BackupTool.ico BackupTool.py
 cp *.json dist
 cp LICENSE dist
 cp *.command dist

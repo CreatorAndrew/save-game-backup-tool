@@ -1,8 +1,8 @@
 import sys
+import subprocess
 import threading
 import json
 import wx
-import subprocess
 from TempHistory import TempHistory
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
@@ -60,8 +60,17 @@ class BackupTool(wx.App):
                 elif choice == "stop":
                     config = self.add_or_remove_config(config_path, configs)
                     self.remove_config(config)
-                elif choice == "exit" or choice == "quit" or choice == "end": self.quit()
-                elif choice == "help" or choice == "?": help()
+                elif choice == "exit" or choice == "quit" or choice == "end": 
+                    for backup_config in self.backup_configs:
+                        self.stop_queue.append(backup_config.name)
+                        while not backup_config.stop: pass
+                    self.stop_queue = []
+                    self.backup_configs = []
+                    self.configs_used = []
+                    self.stop_backup_tool = True
+                elif choice == "help" or choice == "?": print("Enter in \"start\" to initialize a backup configuration.\n"
+                                                            + "Enter in \"stop\" to suspend a backup configuration.\n"
+                                                            + "Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
                 elif choice != "": print("Invalid command")
                 if self.stop_backup_tool: break
         else:
@@ -101,20 +110,6 @@ class BackupTool(wx.App):
                     choice = None
             config = configs[choice]
         return config
-
-    def quit(self):
-        for backup_config in self.backup_configs:
-            self.stop_queue.append(backup_config.name)
-            while not backup_config.stop: pass
-        self.stop_queue = []
-        self.backup_configs = []
-        self.configs_used = []
-        self.stop_backup_tool = True
-
-def help():
-    print("Enter in \"start\" to initialize a backup configuration.\n"
-        + "Enter in \"stop\" to suspend a backup configuration.\n"
-        + "Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
 
 temp_history = TempHistory()
 print = temp_history.print

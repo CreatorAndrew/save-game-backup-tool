@@ -1,4 +1,4 @@
-pyinstaller BackupTool.py
+pyinstaller --icon=BackupTool.ico BackupTool.py
 cp *.json dist/BackupTool
 cp LICENSE dist/BackupTool
 cp -r Test dist/BackupTool/Test

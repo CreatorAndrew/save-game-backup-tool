@@ -1,4 +1,4 @@
-pyinstaller --hide-console hide-early BackupTool.py
+pyinstaller --hide-console hide-early --icon=BackupTool.ico BackupTool.py
 copy *.json dist\BackupTool
 copy LICENSE dist\BackupTool
 robocopy Test dist\BackupTool\Test /e
