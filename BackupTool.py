@@ -11,6 +11,10 @@ from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
+if sys.platform == "win32":
+    import winshell
+    from win32com.client import Dispatch
+
 class BackupTool(wx.App):
     def main(self):
         if sys.platform == "darwin": subprocess.run("clear")
@@ -23,9 +27,24 @@ class BackupTool(wx.App):
                 if "Exec=" in line: lines[lines.index(line)] = line.replace(" ", "\\ ")
             with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w") as write_file: write_file.writelines(lines)
             subprocess.run(["chmod", "+x", backup_watchdog.replace_local_dot_directory("./BackupTool.desktop")])
-            try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/.local/share/applications/BackupTool.desktop"))
+            try: os.remove(str(Path.home()) + "/.local/share/applications/BackupTool.desktop")
             except: pass
             shutil.move(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), str(Path.home()) + "/.local/share/applications")
+        if sys.platform == "win32":
+            path = os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk")
+            target = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
+            working_directory = "\"" + str(Path.home()) + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs"
+            icon = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
+            shell = Dispatch('WScript.Shell')
+            shortcut = shell.CreateShortCut(path)
+            shortcut.Targetpath = target
+            shortcut.WorkingDirectory = working_directory
+            shortcut.IconLocation = icon
+            shortcut.save()
+            try: os.remove("\"" + str(Path.home()) + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Save Game Backup Tool.lnk\"")
+            except: pass
+            shutil.move(os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk"),
+                        "\"" + str(Path.home()) + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Save Game Backup Tool.lnk\"")
 
         self.backup_configs = []
         self.backup_threads = []
