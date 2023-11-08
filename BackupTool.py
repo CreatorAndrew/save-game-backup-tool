@@ -14,7 +14,8 @@ class BackupTool(wx.App):
         if sys.platform == "linux":
             with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "r") as read_file: lines = read_file.readlines()
             for line in lines:
-                if "Exec=" in line: lines[lines.index(line)] = backup_watchdog.replace_local_dot_directory(line).replace(" ", "\\ ")
+                lines[lines.index(line)] = backup_watchdog.replace_local_dot_directory(line)
+                if "Exec=" in line: line = line.replace(" ", "\\ ")
             with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w") as write_file: write_file.writelines(lines)
 
         self.backup_configs = []
