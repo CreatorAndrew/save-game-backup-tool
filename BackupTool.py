@@ -33,12 +33,10 @@ class BackupTool(wx.App):
         if sys.platform == "win32":
             path = os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk")
             target = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
-            working_directory = "\"" + str(Path.home()) + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs"
             icon = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
             shell = Dispatch('WScript.Shell')
             shortcut = shell.CreateShortCut(path)
             shortcut.Targetpath = target
-            shortcut.WorkingDirectory = working_directory
             shortcut.IconLocation = icon
             shortcut.save()
             try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"))
