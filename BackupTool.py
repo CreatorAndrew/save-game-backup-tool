@@ -37,9 +37,13 @@ class BackupTool(wx.App):
                                     Target=backup_watchdog.replace_local_dot_directory(u"./BackupTool.exe"),
                                     Icon=(backup_watchdog.replace_local_dot_directory(u"./BackupTool.exe"), 0))
             try: os.remove(backup_watchdog.replace_local_dot_directory(os.getenv(u"APPDATA")) + u"/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk")
-            except: pass
-            shutil.move(backup_watchdog.replace_local_dot_directory(u"./Save Game Backup Tool.lnk"),
-                        backup_watchdog.replace_local_dot_directory(os.getenv(u"APPDATA")) + u"/Microsoft/Windows/Start Menu/Programs")
+            except:
+                try: os.remove(backup_watchdog.replace_local_dot_directory(unicode(Path.home())) + u"/Start Menu/Programs/Save Game Backup Tool.lnk")
+                except: pass
+            try: shutil.move(backup_watchdog.replace_local_dot_directory(u"./Save Game Backup Tool.lnk"),
+                             backup_watchdog.replace_local_dot_directory(os.getenv(u"APPDATA")) + u"/Microsoft/Windows/Start Menu/Programs")
+            except: shutil.move(backup_watchdog.replace_local_dot_directory(u"./Save Game Backup Tool.lnk"),
+                                backup_watchdog.replace_local_dot_directory(unicode(Path.home())) + u"/Start Menu/Programs")
 
         self.backup_configs = []
         self.backup_threads = []
