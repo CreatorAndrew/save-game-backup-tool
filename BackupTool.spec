@@ -31,7 +31,7 @@ exe = EXE(
     target_arch='universal2',
     codesign_identity=None,
     entitlements_file=None,
-    icon=['BackupTool.ico'],
+    icon=['BackupTool.png'],
 )
 coll = COLLECT(
     exe,
@@ -45,6 +45,6 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='BackupTool.app',
-    icon='BackupTool.ico',
+    icon='BackupTool.png',
     bundle_identifier=None,
 )
