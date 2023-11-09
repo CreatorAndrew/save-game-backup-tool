@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from __future__ import absolute_import
 import os
+import sys
 import json
 import wx
 from io import open
@@ -25,9 +26,11 @@ class BackupConfig(object):
                                             use_prompt=self.use_prompt): break
             self.stop = True
             if os.path.exists(self.stop_backup_file):
-                if text_ctrl is None: button_config.remove_config(button_index, False)
+                if text_ctrl is None:
+                     if button_index is not None: button_config.remove_config(button_index, False)
                 else: wx.CallAfter(button_config.remove_config, button_index, False)
             while os.path.exists(self.stop_backup_file): os.remove(self.stop_backup_file)
+            if button_index is None: sys.exit(0)
 
     def get_configs(self):
         with open(backup_watchdog.replace_local_dot_directory(u"./MasterConfig.json"), u"r") as read_file: return json.load(read_file)[u"configurations"]
