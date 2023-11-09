@@ -1,20 +1,45 @@
 from __future__ import with_statement
 from __future__ import absolute_import
 from __future__ import print_function
+import os
 import sys
+import shutil
+import subprocess
 import threading
 import json
 import wx
-import subprocess
+from pathlib2 import Path
 from io import open
 from TempHistory import TempHistory
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
+if sys.platform == u"win32": import winshell
+
 class BackupTool(wx.App):
     def main(self):
         if sys.platform == u"darwin": subprocess.run(u"clear")
+        if sys.platform == u"linux" and os.path.exists(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop")):
+            shutil.copy(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop"),
+                        backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"))
+            with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"r") as read_file: lines = read_file.readlines()
+            for line in lines:
+                lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
+                if u"Exec=" in line: lines[lines.index(line)] = line.replace(u" u", u"\\ u")
+            with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w") as write_file: write_file.writelines(lines)
+            subprocess.run(["chmod", u"+x", backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop")])
+            try: os.remove(unicode(Path.home()) + u"/.local/share/applications/BackupTool.desktop")
+            except: pass
+            shutil.move(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), unicode(Path.home()) + u"/.local/share/applications")
+        if sys.platform == u"win32":
+            winshell.CreateShortcut(Path=backup_watchdog.replace_local_dot_directory(u"./Save Game Backup Tool.lnk"),
+                                    Target=backup_watchdog.replace_local_dot_directory(u"./BackupTool.exe"),
+                                    Icon=(backup_watchdog.replace_local_dot_directory(u"./BackupTool.exe"), 0))
+            try: os.remove(backup_watchdog.replace_local_dot_directory(os.getenv(u"APPDATA")) + u"/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk")
+            except: pass
+            shutil.move(backup_watchdog.replace_local_dot_directory(u"./Save Game Backup Tool.lnk"),
+                        backup_watchdog.replace_local_dot_directory(os.getenv(u"APPDATA")) + u"/Microsoft/Windows/Start Menu/Programs")
 
         self.backup_configs = []
         self.backup_threads = []
@@ -64,8 +89,17 @@ class BackupTool(wx.App):
                 elif choice == u"stop":
                     config = self.add_or_remove_config(config_path, configs)
                     self.remove_config(config)
-                elif choice == u"exit" or choice == u"quit" or choice == u"end": self.quit()
-                elif choice == u"help" or choice == u"?": help()
+                elif choice == u"exit" or choice == u"quit" or choice == u"end":
+                    for backup_config in self.backup_configs: 
+                        self.stop_queue.append(backup_config.name)
+                        while not backup_config.stop: pass
+                    self.stop_queue = []
+                    self.backup_configs = []
+                    self.configs_used = []
+                    self.stop_backup_tool = True
+                elif choice == u"help" or choice == u"?": print(u"Enter in \"start\" to initialize a backup configuration.\n"
+                                                              + u"Enter in \"stop\" to suspend a backup configuration.\n"
+                                                              + u"Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
                 elif choice != u"": print(u"Invalid command")
                 if self.stop_backup_tool: break
         else:
@@ -105,20 +139,6 @@ class BackupTool(wx.App):
                     choice = None
             config = configs[choice]
         return config
-
-    def quit(self):
-        for backup_config in self.backup_configs: 
-            self.stop_queue.append(backup_config.name)
-            while not backup_config.stop: pass
-        self.stop_queue = []
-        self.backup_configs = []
-        self.configs_used = []
-        self.stop_backup_tool = True
-
-def help():
-    print(u"Enter in \"start\" to initialize a backup configuration.\n"
-        + u"Enter in \"stop\" to suspend a backup configuration.\n"
-        + u"Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
 
 temp_history = TempHistory()
 print = temp_history.print

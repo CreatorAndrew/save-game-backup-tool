@@ -1,7 +1,9 @@
 from __future__ import division
 from __future__ import absolute_import
+import sys
 import threading
 import wx
+from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
 
 class BackupGUI(wx.Frame):
@@ -11,6 +13,7 @@ class BackupGUI(wx.Frame):
         width = 512
         height = 384
         self.SetTitle(u"Save Game Backup Tool")
+        if sys.platform != u"darwin": self.SetIcon(wx.Icon(BackupWatchdog().replace_local_dot_directory(u"./BackupTool.ico")))
 
         self.panel = wx.Panel(self, wx.ID_ANY)
 
@@ -70,7 +73,7 @@ class BackupGUI(wx.Frame):
                 backup_threads[configs_used.index(configs[index])].join()
                 while not backup_configs[configs_used.index(configs[index])].stop: pass
                 index += 1
-        except Exception: pass
+        except: pass
         backup_configs = []
         configs_used = []
         stop_queue = []
