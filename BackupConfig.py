@@ -23,7 +23,8 @@ class BackupConfig:
                                             use_prompt=self.use_prompt): break
             self.stop = True
             if os.path.exists(self.stop_backup_file):
-                if text_ctrl is None and button_index is not None: button_config.remove_config(button_index, False)
+                if text_ctrl is None:
+                    if button_index is not None: button_config.remove_config(button_index, False)
                 else: wx.CallAfter(button_config.remove_config, button_index, False)
             while os.path.exists(self.stop_backup_file): os.remove(self.stop_backup_file)
             if button_index is None: sys.exit(0)
