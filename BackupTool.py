@@ -11,9 +11,7 @@ from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
-if sys.platform == "win32":
-    import winshell
-    from win32com.client import Dispatch
+if sys.platform == "win32": import winshell
 
 class BackupTool(wx.App):
     def main(self):
@@ -31,19 +29,13 @@ class BackupTool(wx.App):
             except: pass
             shutil.move(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), str(Path.home()) + "/.local/share/applications")
         if sys.platform == "win32":
-            path = os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk")
-            target = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
-            icon = backup_watchdog.replace_local_dot_directory("./BackupTool.exe")
-            shell = Dispatch('WScript.Shell')
-            shortcut = shell.CreateShortCut(path)
-            shortcut.Targetpath = target
-            shortcut.IconLocation = icon
-            shortcut.save()
-            try: os.remove(backup_watchdog.replace_local_dot_directory(str(Path.home()) +
-                                                                       "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"))
+            winshell.CreateShortcut(Path=backup_watchdog.replace_local_dot_directory("./Save Game Backup Tool.lnk"),
+                                    Target=backup_watchdog.replace_local_dot_directory("./BackupTool.exe"),
+                                    Icon=(backup_watchdog.replace_local_dot_directory("./BackupTool.exe"), 0))
+            try: os.remove(backup_watchdog.replace_local_dot_directory(os.getenv("APPDATA")) + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk")
             except: pass
-            shutil.move(os.path.join(backup_watchdog.replace_local_dot_directory("./"), "Save Game Backup Tool.lnk"),
-                        backup_watchdog.replace_local_dot_directory(str(Path.home()) + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"))
+            shutil.move(backup_watchdog.replace_local_dot_directory("./Save Game Backup Tool.lnk"),
+                        backup_watchdog.replace_local_dot_directory(os.getenv("APPDATA")) + "/Microsoft/Windows/Start Menu/Programs")
 
         self.backup_configs = []
         self.backup_threads = []
