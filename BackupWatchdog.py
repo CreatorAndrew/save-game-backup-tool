@@ -72,7 +72,7 @@ class BackupWatchdog(object):
                 
                 if text_area is None and use_prompt: print(u"")
                 if os.path.exists(backup_folder + backup):
-                    if backup_folder.endswith(u"/"): backup_folder = backup_folder[:len(backup_folder) - 2]
+                    if backup_folder.endswith(u"/"): backup_folder = backup_folder[:len(backup_folder) - 1]
                     print(self.add_text_to_text_area(backup + u" already exists in " + backup_folder + u".\nBackup cancelled", text_area))
                 else:
                     # Create the backup archive file
