@@ -71,7 +71,7 @@ class BackupGUI(wx.Frame):
                 backup_threads[configs_used.index(configs[index])].join()
                 while not backup_configs[configs_used.index(configs[index])].stop: pass
                 index += 1
-        except Exception: pass
+        except: pass
         backup_configs = []
         configs_used = []
         stop_queue = []
