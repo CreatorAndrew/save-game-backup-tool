@@ -66,7 +66,7 @@ class BackupTool(wx.App):
         index = 0
         while index < len(sys.argv) and not skip_choice:
             if sys.argv[index].lower() == u"--config" and index < len(sys.argv) - 1:
-                config_path = sys.argv[index + 1]
+                config_path = sys.argv[index + 1].replace(".json", "") + ".json"
                 break
             index += 1
 
