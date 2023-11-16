@@ -1,12 +1,9 @@
-pyinstaller --hide-console hide-early --icon=BackupTool.ico BackupTool.py
-copy *.json dist\BackupTool
-copy *.ico dist\BackupTool
-copy LICENSE dist\BackupTool
-robocopy Test dist\BackupTool\Test /e
-cd dist
-rename BackupTool "Save Game Backup Tool"
+pyinstaller --onefile --hide-console hide-early --icon=BackupTool.ico BackupTool.py
+copy *.json dist
+copy *.ico dist
+copy LICENSE dist
+robocopy Test dist\Test /e
+rename dist "Save Game Backup Tool"
 7z a save-game-backup-tool-win32-amd64.zip "Save Game Backup Tool"
-move save-game-backup-tool-win32-amd64.zip ..
-cd ..
-rmdir /s /q dist
+rmdir /s /q "Save Game Backup Tool"
 rmdir /s /q build

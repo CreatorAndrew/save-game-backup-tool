@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import json
 import wx
@@ -14,8 +15,7 @@ class BackupWatchdog:
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
-        return (path.replace("./", os.path.dirname(os.path.abspath(__file__)).replace("\\", "/") + "/")
-                    .replace("/_internal", "")
+        return (path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
                     .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
 
     def add_text_to_text_area(self, text, text_area=None):
@@ -88,3 +88,5 @@ class BackupWatchdog:
 
 temp_history = TempHistory()
 print = temp_history.print
+if sys.platform == "darwin": executable = os.path.abspath(__file__)
+else: executable = sys.executable
