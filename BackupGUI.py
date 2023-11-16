@@ -8,26 +8,30 @@ from BackupConfig import BackupConfig
 
 class BackupGUI(wx.Frame):
     def __init__(self, *args, **kwds):
+        self.backup_threads = []
+        self.backup_configs = []
+        self.configs = BackupConfig().get_configs()
+        self.configs_used = []
+        self.stop_queue = []
+
         kwds[u"style"] = kwds.get(u"style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
         width = 512
         height = 384
         self.SetTitle(u"Save Game Backup Tool")
         if sys.platform != u"darwin": self.SetIcon(wx.Icon(BackupWatchdog().replace_local_dot_directory(u"./BackupTool.ico")))
-
         self.panel = wx.Panel(self, wx.ID_ANY)
-
         sizer = wx.BoxSizer(wx.VERTICAL)
-        grid = wx.GridSizer(len(configs), 2, 0, 0)
+        grid = wx.GridSizer(len(self.configs), 2, 0, 0)
         sizer.Add(grid, 0, wx.EXPAND, 0)
 
         labels = []
         self.buttons = []
         index = 0
         button_grid_height = 0
-        for config in configs:
+        for config in self.configs:
             self.buttons.append(wx.Button(self.panel, index, u"Start"))
-            labels.append(wx.StaticText(self.panel, index, configs[configs.index(config)][u"name"].replace(u"&", u"&&")))
+            labels.append(wx.StaticText(self.panel, index, self.configs[self.configs.index(config)][u"name"].replace(u"&", u"&&")))
             grid.Add(labels[len(labels) - 1], 0, wx.ALIGN_CENTER, 0)
             grid.Add(self.buttons[len(self.buttons) - 1], 0, wx.ALIGN_CENTER, 0)
             button_grid_height += self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
@@ -47,41 +51,28 @@ class BackupGUI(wx.Frame):
 
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
-        if configs[index] not in configs_used:
-            configs_used.append(configs[index])
-            backup_configs.append(BackupConfig(name=configs[index][u"name"], path=configs[index][u"file"]))
-            backup_threads.append(threading.Thread(target=backup_configs[len(backup_configs) - 1].watchdog,
-                                                   args=(stop_queue, self.text_ctrl, self, index)))
-            backup_threads[len(backup_threads) - 1].start()
+        if self.configs[index] not in self.configs_used:
+            self.configs_used.append(self.configs[index])
+            self.backup_configs.append(BackupConfig(name=self.configs[index][u"name"], path=self.configs[index][u"file"]))
+            self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
+                                                        args=(self.stop_queue, self.text_ctrl, self, index)))
+            self.backup_threads[len(self.backup_threads) - 1].start()
             self.buttons[index].SetLabel(u"Stop")
         else: self.remove_config(index)
 
-    def remove_config(self, index, join=True):
-        stop_queue.append(backup_configs[configs_used.index(configs[index])].name)
-        if join: backup_threads[configs_used.index(configs[index])].join()
-        while not backup_configs[configs_used.index(configs[index])].stop: pass
-        stop_queue.remove(backup_configs[configs_used.index(configs[index])].name)
-        backup_configs.remove(backup_configs[configs_used.index(configs[index])])
-        configs_used.remove(configs_used[configs_used.index(configs[index])])
+    def remove_config(self, index):
+        self.stop_queue.append(self.backup_configs[self.configs_used.index(self.configs[index])].name)
+        while not self.backup_configs[self.configs_used.index(self.configs[index])].stop: pass
+        self.stop_queue.remove(self.backup_configs[self.configs_used.index(self.configs[index])].name)
+        self.backup_configs.remove(self.backup_configs[self.configs_used.index(self.configs[index])])
+        self.configs_used.remove(self.configs_used[self.configs_used.index(self.configs[index])])
         self.buttons[index].SetLabel(u"Start")
 
     def on_close(self, event):
-        try:
-            index = 0
-            while index < len(configs_used):
-                stop_queue.append(backup_configs[configs_used.index(configs[index])].name)
-                backup_threads[configs_used.index(configs[index])].join()
-                while not backup_configs[configs_used.index(configs[index])].stop: pass
-                index += 1
-        except: pass
-        backup_configs = []
-        configs_used = []
-        stop_queue = []
+        for backup_config in self.backup_configs:
+            self.stop_queue.append(backup_config.name)
+            while not backup_config.stop: pass
+        self.stop_queue = []
+        self.backup_configs = []
+        self.configs_used = []
         self.Destroy()
-
-backup_threads = []
-backup_configs = []
-backup_config = BackupConfig()
-configs = backup_config.get_configs()
-configs_used = []
-stop_queue = []

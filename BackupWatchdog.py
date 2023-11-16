@@ -56,7 +56,7 @@ class BackupWatchdog(object):
             if text_area is None and use_prompt: print(self.prompt, end=u"", flush=True)
             if button_config is not None:
                 if text_area is None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index, False)
+                else: wx.CallAfter(button_config.remove_config, button_index)
             return True
         save_folder = save_path[:save_path.rindex(u"/") + 1]
 
