@@ -104,12 +104,10 @@ class BackupTool(wx.App):
             frame.Show()
             app.MainLoop()
 
-    def remove_config(self, config, join=True):
+    def remove_config(self, config, wait=True):
         if config in self.configs_used:
             self.stop_queue.append(self.backup_configs[self.configs_used.index(config)].name)
-            if join:
-                self.backup_threads[self.configs_used.index(config)].join()
-                while not self.backup_configs[self.configs_used.index(config)].stop: pass
+            while wait and not self.backup_configs[self.configs_used.index(config)].stop: pass
             self.stop_queue.remove(self.backup_configs[self.configs_used.index(config)].name)
             self.backup_configs.remove(self.backup_configs[self.configs_used.index(config)])
             self.configs_used.remove(config)

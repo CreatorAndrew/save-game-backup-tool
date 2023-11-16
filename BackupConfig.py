@@ -25,7 +25,7 @@ class BackupConfig:
             if os.path.exists(self.stop_backup_file):
                 if text_ctrl is None:
                     if button_index is not None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index, False)
+                else: wx.CallAfter(button_config.remove_config, button_index)
             while os.path.exists(self.stop_backup_file):
                 try: os.remove(self.stop_backup_file)
                 except: pass
