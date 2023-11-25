@@ -68,7 +68,7 @@ class BackupWatchdog:
                 if text_area is None and use_prompt: print("")
                 if os.path.exists(backup_folder + backup):
                     if backup_folder.endswith("/"): backup_folder = backup_folder[:len(backup_folder) - 1]
-                    print(self.add_text_to_text_area(backup + " already exists in " + backup_folder + ".\nBackup cancelled", text_area))
+                    print(self.add_text_to_text_area(backup + " already exists in " + backup_folder.replace("/", separator) + ".\nBackup cancelled", text_area))
                 else:
                     # Create the backup archive file
                     with ZipFile(backup_folder + backup, "w") as backup_archive:
@@ -90,3 +90,5 @@ temp_history = TempHistory()
 print = temp_history.print
 if sys.platform == "darwin": executable = os.path.abspath(__file__)
 else: executable = sys.executable
+if sys.platform == "win32": separator = "\\"
+else: separator = "/"

@@ -1,7 +1,6 @@
 import sys
-import platform
 
-if platform.system() == "Windows":
+if sys.platform == "win32":
     try: import colorama
     except ImportError:
         import ctypes
