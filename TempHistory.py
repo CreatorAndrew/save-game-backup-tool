@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
-import platform
 
-if platform.system() == u"Windows":
+if sys.platform == u"win32":
     try: import colorama
     except ImportError:
         import ctypes

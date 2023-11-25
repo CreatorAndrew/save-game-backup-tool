@@ -2,6 +2,7 @@ from __future__ import with_statement
 from __future__ import absolute_import
 from __future__ import print_function
 import os
+import sys
 import time
 import json
 import wx
@@ -72,7 +73,7 @@ class BackupWatchdog(object):
                 if text_area is None and use_prompt: print(u"")
                 if os.path.exists(backup_folder + backup):
                     if backup_folder.endswith(u"/"): backup_folder = backup_folder[:len(backup_folder) - 1]
-                    print(self.add_text_to_text_area(backup + u" already exists in " + backup_folder + u".\nBackup cancelled", text_area))
+                    print(self.add_text_to_text_area(backup + u" already exists in " + backup_folder.replace(u"/", separator) + u".\nBackup cancelled", text_area))
                 else:
                     # Create the backup archive file
                     with ZipFile(backup_folder + backup, u"w") as backup_archive:
@@ -86,10 +87,12 @@ class BackupWatchdog(object):
                 if text_area is None and use_prompt: print(self.prompt, end=u"", flush=True)
                 # Update the JSON file
                 data[u"lastBackupTime"] = last_backup_time
-                with open(config_file, u"w", encoding="utf-8") as write_file:
+                with open(config_file, u"w", encoding=u"utf-8") as write_file:
                     content = json.dumps(data, indent=4, ensure_ascii=False)
-                    if isinstance(content, str): content = content.decode("utf-8")
+                    if isinstance(content, str): content = content.decode(u"utf-8")
                     write_file.write(content)
 
 temp_history = TempHistory()
 print = temp_history.print
+if sys.platform == u"win32": separator = u"\\"
+else: separator = u"/"
