@@ -33,15 +33,15 @@ class TempHistory(object):
         self.print(u"\x1b[{}C\x1b[1A".format(line_length), end=u"", flush=True, record=False)
 
     def print(self, *args, **_3to2kwargs):
-        if "record" in _3to2kwargs: record = _3to2kwargs["record"]; del _3to2kwargs["record"]
+        if u"record" in _3to2kwargs: record = _3to2kwargs[u"record"]; del _3to2kwargs[u"record"]
         else: record = True
-        if "flush" in _3to2kwargs: flush = _3to2kwargs["flush"]; del _3to2kwargs["flush"]
+        if u"flush" in _3to2kwargs: flush = _3to2kwargs[u"flush"]; del _3to2kwargs[u"flush"]
         else: flush = False
-        if "file" in _3to2kwargs: file = _3to2kwargs["file"]; del _3to2kwargs["file"]
+        if u"file" in _3to2kwargs: file = _3to2kwargs[u"file"]; del _3to2kwargs[u"file"]
         else: file = sys.stdout
-        if "end" in _3to2kwargs: end = _3to2kwargs["end"]; del _3to2kwargs["end"]
+        if u"end" in _3to2kwargs: end = _3to2kwargs[u"end"]; del _3to2kwargs[u"end"]
         else: end = u"\n"
-        if "sep" in _3to2kwargs: sep = _3to2kwargs["sep"]; del _3to2kwargs["sep"]
+        if u"sep" in _3to2kwargs: sep = _3to2kwargs[u"sep"]; del _3to2kwargs[u"sep"]
         else: sep = u" "
         self.builtin_print(*args, sep=sep, end=end, file=file)
         if flush: sys.stdout.flush()

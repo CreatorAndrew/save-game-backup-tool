@@ -28,7 +28,7 @@ class BackupTool(wx.App):
                 lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
                 if u"Exec=" in line: lines[lines.index(line)] = u"Exec=\"" + line.replace(u"Exec=", u"").replace(u"\n", u"\"\n")
             with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w") as write_file: write_file.writelines(lines)
-            subprocess.run(["chmod", u"+x", backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop")])
+            subprocess.run([u"chmod", u"+x", backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop")])
             try: os.remove(unicode(Path.home()) + u"/.local/share/applications/BackupTool.desktop")
             except: pass
             shutil.move(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), unicode(Path.home()) + u"/.local/share/applications")
@@ -66,7 +66,7 @@ class BackupTool(wx.App):
         index = 0
         while index < len(sys.argv) and not skip_choice:
             if sys.argv[index].lower() == u"--config" and index < len(sys.argv) - 1:
-                config_path = sys.argv[index + 1].replace(".json", "") + ".json"
+                config_path = sys.argv[index + 1].replace(u".json", u"") + u".json"
                 break
             index += 1
 
