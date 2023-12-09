@@ -4,7 +4,6 @@ from __future__ import print_function
 import os
 import sys
 import shutil
-import subprocess
 import threading
 import json
 import wx
@@ -19,7 +18,7 @@ if sys.platform == u"win32": import winshell
 
 class BackupTool(wx.App):
     def main(self):
-        if sys.platform == u"darwin": subprocess.run(u"clear")
+        if sys.platform == u"darwin": os.system(u"clear")
         if sys.platform == u"linux" and os.path.exists(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop")):
             shutil.copy(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop"),
                         backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"))
@@ -28,7 +27,7 @@ class BackupTool(wx.App):
                 lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
                 if u"Exec=" in line: lines[lines.index(line)] = u"Exec=\"" + line.replace(u"Exec=", u"").replace(u"\n", u"\"\n")
             with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w") as write_file: write_file.writelines(lines)
-            subprocess.run([u"chmod", u"+x", backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop")])
+            os.system(u"chmod +x ./BackupTool.desktop")
             try: os.remove(unicode(Path.home()) + u"/.local/share/applications/BackupTool.desktop")
             except: pass
             shutil.move(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), unicode(Path.home()) + u"/.local/share/applications")
