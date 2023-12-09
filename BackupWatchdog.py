@@ -20,7 +20,7 @@ class BackupWatchdog(object):
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
         return (path.replace(u"./", os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/") + u"/")
-                    .replace(u"/Save Game Backup Tool.app/Contents/Frameworks", u""))
+                    .replace(u"/Save Game Backup Tool.app/Contents/MacOS", u""))
 
     def add_text_to_text_area(self, text, text_area=None):
         if text_area is not None: wx.CallAfter(text_area.AppendText, text + u"\n")
