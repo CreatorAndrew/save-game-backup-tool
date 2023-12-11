@@ -9,5 +9,6 @@
             "file": "Test.json"
         }
     ],
-    "default": "Bully: Scholarship Edition"
+    "default": "Bully: Scholarship Edition",
+    "interval": 1
 }

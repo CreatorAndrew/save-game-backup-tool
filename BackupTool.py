@@ -1,7 +1,5 @@
 import os
 import sys
-import shutil
-import subprocess
 import threading
 import json
 import wx
@@ -12,6 +10,8 @@ from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
 if sys.platform == "win32": import winshell
+else: import subprocess
+if sys.platform == "linux": import shutil
 
 class BackupTool(wx.App):
     def main(self):
@@ -19,11 +19,11 @@ class BackupTool(wx.App):
         if sys.platform == "linux" and os.path.exists(backup_watchdog.replace_local_dot_directory("./.BackupTool.desktop")):
             shutil.copy(backup_watchdog.replace_local_dot_directory("./.BackupTool.desktop"),
                         backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"))
-            with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "r") as read_file: lines = read_file.readlines()
+            lines = open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "r").readlines()
             for line in lines:
                 lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
                 if "Exec=" in line: lines[lines.index(line)] = "Exec=\"" + line.replace("Exec=", "").replace("\n", "\"\n")
-            with open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w") as write_file: write_file.writelines(lines)
+            open(backup_watchdog.replace_local_dot_directory("./BackupTool.desktop"), "w").writelines(lines)
             subprocess.run(["chmod", "+x", backup_watchdog.replace_local_dot_directory("./BackupTool.desktop")])
             try: os.remove(str(Path.home()) + "/.local/share/applications/BackupTool.desktop")
             except: pass
@@ -41,10 +41,7 @@ class BackupTool(wx.App):
         self.backup_threads = []
         self.configs_used = []
 
-        with open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r") as read_file:
-            data = json.load(read_file)
-            configs = data["configurations"]
-            default_config_name = data["default"]
+        data = json.load(open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r"))
 
         config_path = None
         skip_choice = False
@@ -53,8 +50,8 @@ class BackupTool(wx.App):
             if arg.lower() == "--no-gui": no_gui = True
             elif arg.lower() == "--skip-choice": skip_choice = True
         if skip_choice:
-            for config in configs:
-                if config["name"] == default_config_name: config_path = config["file"]
+            for config in data["configurations"]:
+                if config["name"] == data["default"]: config_path = config["file"]
         index = 0
         while index < len(sys.argv) and not skip_choice:
             if sys.argv[index].lower() == "--config" and index < len(sys.argv) - 1:
@@ -66,7 +63,7 @@ class BackupTool(wx.App):
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig(name="Single Config", path=config_path))
+                self.backup_configs.append(BackupConfig(name="Single Config", path=config_path, interval=data["interval"]))
                 self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print("Enter in \"help\" or \"?\" for assistance.")
@@ -74,16 +71,16 @@ class BackupTool(wx.App):
                 print(backup_watchdog.prompt, end="")
                 choice = input()
                 if choice == "start":
-                    config = self.add_or_remove_config(config_path, configs)
+                    config = self.add_or_remove_config(config_path, data["configurations"])
                     if config not in self.configs_used:
                         self.configs_used.append(config)
-                        self.backup_configs.append(BackupConfig(name=config["name"], path=config["file"], use_prompt=True))
+                        self.backup_configs.append(BackupConfig(config["name"], config["file"], True, data["interval"]))
                         self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                                     args=(self.stop_queue, None, self, config)))
                         self.backup_threads[len(self.backup_threads) - 1].start()
                     else: print("That configuration is already in use.")
                 elif choice == "stop":
-                    config = self.add_or_remove_config(config_path, configs)
+                    config = self.add_or_remove_config(config_path, data["configurations"])
                     self.remove_config(config)
                 elif choice == "exit" or choice == "quit" or choice == "end": 
                     for backup_config in self.backup_configs:
@@ -93,9 +90,9 @@ class BackupTool(wx.App):
                     self.backup_configs = []
                     self.configs_used = []
                     self.stop_backup_tool = True
-                elif choice == "help" or choice == "?": print("Enter in \"start\" to initialize a backup configuration.\n"
-                                                            + "Enter in \"stop\" to suspend a backup configuration.\n"
-                                                            + "Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
+                elif choice == "help" or choice == "?": print("Enter in \"start\" to initialize a backup configuration.\n" +
+                                                              "Enter in \"stop\" to suspend a backup configuration.\n" +
+                                                              "Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
                 elif choice != "": print("Invalid command")
                 if self.stop_backup_tool: break
         else:
