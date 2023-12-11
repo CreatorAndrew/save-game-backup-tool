@@ -10,5 +10,5 @@
         }
     ],
     "default": "Bully: Scholarship Edition",
-    "interval": 1
+    "interval": 0.1
 }
