@@ -32,8 +32,6 @@ class BackupWatchdog:
         if data["backupPath"]["isAbsolute"]: home = ""
         else: home = str(Path.home()) + "/"
         backup_folder = self.replace_local_dot_directory(home + data["backupPath"]["path"])
-        backup_file_name_prefix = data["backupFileNamePrefix"]
-        last_backup_time = data["lastBackupTime"]
 
         save_path = None
         for path in save_paths:
@@ -56,10 +54,10 @@ class BackupWatchdog:
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
         try:
-            if int(self.get_modified_date(save_path)) > last_backup_time:
-                last_backup_time = int(self.get_modified_date(save_path))
+            if int(self.get_modified_date(save_path)) > data["lastBackupTime"]:
+                data["lastBackupTime"] = int(self.get_modified_date(save_path))
 
-                backup = backup_file_name_prefix + "+" + str(last_backup_time) + ".zip"
+                backup = data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
                 if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
 
                 if text_ctrl is None and use_prompt: print("")
@@ -78,7 +76,6 @@ class BackupWatchdog:
                         if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
                 if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
                 # Update the JSON file
-                data["lastBackupTime"] = last_backup_time
                 json.dump(data, open(config_file, "w"), indent=4)
         # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
         except FileNotFoundError: pass
