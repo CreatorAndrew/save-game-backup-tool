@@ -1,9 +1,7 @@
-from __future__ import with_statement
 from __future__ import absolute_import
 from __future__ import print_function
 import os
 import sys
-import shutil
 import threading
 import json
 import wx
@@ -15,6 +13,7 @@ from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
 if sys.platform == u"win32": import winshell
+elif sys.platform == u"linux": import shutil
 
 class BackupTool(wx.App):
     def main(self):
@@ -22,11 +21,11 @@ class BackupTool(wx.App):
         if sys.platform == u"linux" and os.path.exists(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop")):
             shutil.copy(backup_watchdog.replace_local_dot_directory(u"./.BackupTool.desktop"),
                         backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"))
-            with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"r") as read_file: lines = read_file.readlines()
+            lines = open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"r").readlines()
             for line in lines:
                 lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
                 if u"Exec=" in line: lines[lines.index(line)] = u"Exec=\"" + line.replace(u"Exec=", u"").replace(u"\n", u"\"\n")
-            with open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w") as write_file: write_file.writelines(lines)
+            open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w").writelines(lines)
             os.system(u"chmod +x ./BackupTool.desktop")
             try: os.remove(unicode(Path.home()) + u"/.local/share/applications/BackupTool.desktop")
             except: pass
@@ -48,10 +47,7 @@ class BackupTool(wx.App):
         self.backup_threads = []
         self.configs_used = []
 
-        with open(backup_watchdog.replace_local_dot_directory(u"./MasterConfig.json"), u"r") as read_file:
-            data = json.load(read_file)
-            configs = data[u"configurations"]
-            default_config_name = data[u"default"]
+        data = json.load(open(backup_watchdog.replace_local_dot_directory(u"./MasterConfig.json"), u"r"))
 
         config_path = None
         skip_choice = False
@@ -60,8 +56,8 @@ class BackupTool(wx.App):
             if arg.lower() == u"--no-gui": no_gui = True
             elif arg.lower() == u"--skip-choice": skip_choice = True
         if skip_choice:
-            for config in configs:
-                if config[u"name"] == default_config_name: config_path = config[u"file"]
+            for config in data[u"configurations"]:
+                if config[u"name"] == data[u"default"]: config_path = config[u"file"]
         index = 0
         while index < len(sys.argv) and not skip_choice:
             if sys.argv[index].lower() == u"--config" and index < len(sys.argv) - 1:
@@ -73,7 +69,7 @@ class BackupTool(wx.App):
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig(name=u"Single Config", path=config_path))
+                self.backup_configs.append(BackupConfig(name=u"Single Config", path=config_path, interval=data[u"interval"]))
                 self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print(u"Enter in \"help\" or \"?\" for assistance.")
@@ -81,16 +77,16 @@ class BackupTool(wx.App):
                 print(backup_watchdog.prompt, end=u"")
                 choice = input()
                 if choice == u"start":
-                    config = self.add_or_remove_config(config_path, configs)
+                    config = self.add_or_remove_config(config_path, data[u"configurations"])
                     if config not in self.configs_used:
                         self.configs_used.append(config)
-                        self.backup_configs.append(BackupConfig(name=config[u"name"], path=config[u"file"], use_prompt=True))
+                        self.backup_configs.append(BackupConfig(config[u"name"], config[u"file"], True, data[u"interval"]))
                         self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                                     args=(self.stop_queue, None, self, config)))
                         self.backup_threads[len(self.backup_threads) - 1].start()
                     else: print(u"That configuration is already in use.")
                 elif choice == u"stop":
-                    config = self.add_or_remove_config(config_path, configs)
+                    config = self.add_or_remove_config(config_path, data[u"configurations"])
                     self.remove_config(config)
                 elif choice == u"exit" or choice == u"quit" or choice == u"end":
                     for backup_config in self.backup_configs: 
@@ -100,9 +96,9 @@ class BackupTool(wx.App):
                     self.backup_configs = []
                     self.configs_used = []
                     self.stop_backup_tool = True
-                elif choice == u"help" or choice == u"?": print(u"Enter in \"start\" to initialize a backup configuration.\n"
-                                                              + u"Enter in \"stop\" to suspend a backup configuration.\n"
-                                                              + u"Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
+                elif choice == u"help" or choice == u"?": print(u"Enter in \"start\" to initialize a backup configuration.\n" +
+                                                                u"Enter in \"stop\" to suspend a backup configuration.\n" +
+                                                                u"Enter in \"exit\", \"quit\", or \"end\" to shut down this tool.")
                 elif choice != u"": print(u"Invalid command")
                 if self.stop_backup_tool: break
         else:

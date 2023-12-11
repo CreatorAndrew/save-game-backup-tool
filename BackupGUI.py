@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import absolute_import
 import sys
 import threading
+import json
 import wx
 from BackupWatchdog import BackupWatchdog
 from BackupConfig import BackupConfig
@@ -53,7 +54,9 @@ class BackupGUI(wx.Frame):
         index = event.GetEventObject().GetId()
         if self.configs[index] not in self.configs_used:
             self.configs_used.append(self.configs[index])
-            self.backup_configs.append(BackupConfig(name=self.configs[index][u"name"], path=self.configs[index][u"file"]))
+            self.backup_configs.append(BackupConfig(name=self.configs[index][u"name"],
+                                                    path=self.configs[index][u"file"],
+                                                    interval=json.load(open(BackupWatchdog().replace_local_dot_directory(u"./MasterConfig.json"), u"r"))[u"interval"]))
             self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                         args=(self.stop_queue, self.text_ctrl, self, index)))
             self.backup_threads[len(self.backup_threads) - 1].start()
