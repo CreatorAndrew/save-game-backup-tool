@@ -36,8 +36,6 @@ class BackupWatchdog(object):
         if data[u"backupPath"][u"isAbsolute"]: home = u""
         else: home = unicode(Path.home()) + u"/"
         backup_folder = self.replace_local_dot_directory(home + data[u"backupPath"][u"path"])
-        backup_file_name_prefix = data[u"backupFileNamePrefix"]
-        last_backup_time = data[u"lastBackupTime"]
 
         save_path = None
         for path in save_paths:
@@ -61,10 +59,10 @@ class BackupWatchdog(object):
 
         # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
         if os.path.exists(save_folder):
-            if int(self.get_modified_date(save_path)) > last_backup_time:
-                last_backup_time = int(self.get_modified_date(save_path))
+            if int(self.get_modified_date(save_path)) > data[u"lastBackupTime"]:
+                data[u"lastBackupTime"] = int(self.get_modified_date(save_path))
 
-                backup = backup_file_name_prefix + u"+" + unicode(last_backup_time) + u".zip"
+                backup = data[u"backupFileNamePrefix"] + u"+" + unicode(data[u"lastBackupTime"]) + u".zip"
                 if not backup_folder.endswith(u"/"): backup_folder = backup_folder + u"/"
                 
                 if text_ctrl is None and use_prompt: print(u"")
@@ -83,7 +81,6 @@ class BackupWatchdog(object):
                         if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl(u"Backup successful", text_ctrl))
                 if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
                 # Update the JSON file
-                data[u"lastBackupTime"] = last_backup_time
                 content = json.dumps(data, indent=4, ensure_ascii=False)
                 if isinstance(content, str): content = content.decode(u"utf-8")
                 open(config_file, u"w", encoding=u"utf-8").write(content)
