@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import os
 import sys
+import shutil
 import threading
 import json
 import wx
@@ -13,7 +14,6 @@ from BackupConfig import BackupConfig
 from BackupGUI import BackupGUI
 
 if sys.platform == u"win32": import winshell
-elif sys.platform == u"linux": import shutil
 
 class BackupTool(wx.App):
     def main(self):
