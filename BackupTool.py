@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import threading
 import json
 import wx
@@ -11,7 +12,6 @@ from BackupGUI import BackupGUI
 
 if sys.platform == "win32": import winshell
 else: import subprocess
-if sys.platform == "linux": import shutil
 
 class BackupTool(wx.App):
     def main(self):
