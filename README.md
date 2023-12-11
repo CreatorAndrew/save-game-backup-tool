@@ -1,2 +1,2 @@
-# save-game-backup-tool-python
+# Save Game Backup Tool
 A simple Python application that watches for changes in a specified file and makes a compressed backup archive of its containing folder at the specified destination.
