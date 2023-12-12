@@ -11,11 +11,11 @@ from TempHistory import TempHistory
 class BackupWatchdog:
     prompt = "> "
 
-    def get_modified_date(self, path): return time.strftime("%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path))))
+    def get_modified_date(self, path): return int(time.strftime("%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path)))))
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
-    def replace_local_dot_directory(self, path): return int(path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
-                                                                .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
+    def replace_local_dot_directory(self, path): return (path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
+                                                             .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
 
     def add_to_text_ctrl(self, text, text_ctrl):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + "\n")
