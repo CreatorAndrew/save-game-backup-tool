@@ -14,8 +14,8 @@ class BackupWatchdog:
     def get_modified_date(self, path): return time.strftime("%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path))))
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
-    def replace_local_dot_directory(self, path): return (path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
-                                                             .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
+    def replace_local_dot_directory(self, path): return int(path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
+                                                                .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
 
     def add_to_text_ctrl(self, text, text_ctrl):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + "\n")
@@ -54,8 +54,8 @@ class BackupWatchdog:
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
-        if int(self.get_modified_date(save_path)) > data["lastBackupTime"]:
-            data["lastBackupTime"] = int(self.get_modified_date(save_path))
+        if self.get_modified_date(save_path) > data["lastBackupTime"]:
+            data["lastBackupTime"] = self.get_modified_date(save_path)
 
             backup = data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
             if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
