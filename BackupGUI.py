@@ -54,9 +54,7 @@ class BackupGUI(wx.Frame):
         index = event.GetEventObject().GetId()
         if self.configs[index] not in self.configs_used:
             self.configs_used.append(self.configs[index])
-            self.backup_configs.append(BackupConfig(name=self.configs[index]["name"],
-                                                    path=self.configs[index]["file"],
-                                                    interval=self.interval))
+            self.backup_configs.append(BackupConfig(name=self.configs[index]["name"], path=self.configs[index]["file"], interval=self.interval))
             self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                         args=(self.stop_queue, self.text_ctrl, self, index)))
             self.backup_threads[len(self.backup_threads) - 1].start()
