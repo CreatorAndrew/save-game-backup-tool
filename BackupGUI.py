@@ -12,6 +12,8 @@ class BackupGUI(wx.Frame):
         self.configs = BackupConfig().get_configs()
         self.configs_used = []
         self.stop_queue = []
+        try: self.interval = json.load(open(BackupWatchdog().replace_local_dot_directory("./MasterConfig.json"), "r"))["interval"]
+        except: self.interval = 0
 
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
@@ -54,7 +56,7 @@ class BackupGUI(wx.Frame):
             self.configs_used.append(self.configs[index])
             self.backup_configs.append(BackupConfig(name=self.configs[index]["name"],
                                                     path=self.configs[index]["file"],
-                                                    interval=json.load(open(BackupWatchdog().replace_local_dot_directory("./MasterConfig.json"), "r"))["interval"]))
+                                                    interval=self.interval))
             self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                         args=(self.stop_queue, self.text_ctrl, self, index)))
             self.backup_threads[len(self.backup_threads) - 1].start()
