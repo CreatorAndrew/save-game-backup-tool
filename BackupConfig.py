@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import json
 import wx
 from BackupWatchdog import BackupWatchdog
 
