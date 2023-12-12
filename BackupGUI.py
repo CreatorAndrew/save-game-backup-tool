@@ -7,12 +7,14 @@ from BackupConfig import BackupConfig
 
 class BackupGUI(wx.Frame):
     def __init__(self, *args, **kwds):
+        data = json.load(open(BackupWatchdog().replace_local_dot_directory("./MasterConfig.json"), "r"))
+
         self.backup_threads = []
         self.backup_configs = []
-        self.configs = BackupConfig().get_configs()
+        self.configs = data["configurations"]
         self.configs_used = []
         self.stop_queue = []
-        try: self.interval = json.load(open(BackupWatchdog().replace_local_dot_directory("./MasterConfig.json"), "r"))["interval"]
+        try: self.interval = data["interval"]
         except: self.interval = 0
 
         kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE

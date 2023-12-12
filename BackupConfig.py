@@ -33,6 +33,4 @@ class BackupConfig:
                 except: pass
             if button_index is None: sys.exit(0)
 
-    def get_configs(self): return json.load(open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r"))["configurations"]
-
 backup_watchdog = BackupWatchdog()
