@@ -1,10 +1,4 @@
-pyinstaller --noconsole --target-arch universal2 --codesign-identity $certificate --icon=BackupTool.png BackupTool.py
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Frameworks/*.dylib
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Frameworks/lib-dynload/*.so
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Frameworks/Python.framework/Python
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Frameworks/wx/*.dylib
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Frameworks/wx/*.so
-codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/BackupTool
+pyinstaller --noconsole --target-arch universal2 --icon=BackupTool.png BackupTool.py
 cp *.command dist
 cp *.json dist
 cp LICENSE dist
