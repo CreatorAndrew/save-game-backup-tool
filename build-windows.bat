@@ -12,3 +12,4 @@ copy dist\BackupTool\BackupTool.exe "Save Game Backup Tool\BackupTool (Console).
 rmdir /s /q dist
 rmdir /s /q build
 rmdir /s /q "Save Game Backup Tool"
+del *.spec
