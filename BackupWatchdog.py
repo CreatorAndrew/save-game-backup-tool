@@ -15,19 +15,17 @@ from TempHistory import TempHistory
 class BackupWatchdog(object):
     prompt = u"> "
 
-    def get_modified_date(self, path): return time.strftime(u"%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path))))
+    def get_modified_date(self, path): return int(time.strftime(u"%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path)))))
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path): return (path.replace(u"./", os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/") + u"/")
                                                              .replace(u"/Save Game Backup Tool.app/Contents/MacOS", u""))
 
-    def add_to_text_ctrl(self, text, text_ctrl=None):
+    def add_to_text_ctrl(self, text, text_ctrl):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + u"\n")
         return text
 
-    def watchdog(self, config_file, text_ctrl=None, button_config=None, button_index=None, use_prompt=False, enabled=True):
-        if not enabled: return
-
+    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt, first_run):
         config_file = self.replace_local_dot_directory(u"./" + config_file)
         data = json.load(open(config_file, u"r"))
 
@@ -46,44 +44,45 @@ class BackupWatchdog(object):
                 save_path = temp_save_path
                 break
         if save_path is None:
-            if text_ctrl is None and use_prompt: print(u"")
-            print(self.add_to_text_ctrl(u"No save file found", text_ctrl))
-            if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
-            if button_config is not None:
-                if text_ctrl is None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index)
-            return True
+            if first_run:
+                if text_ctrl is None and use_prompt: print(u"")
+                print(self.add_to_text_ctrl(u"No save file found", text_ctrl))
+                if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
+                if button_config is not None:
+                    if text_ctrl is None: button_config.remove_config(button_index, False)
+                    else: wx.CallAfter(button_config.remove_config, button_index)
+                return True
+            # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
+            return
         save_folder = save_path[:save_path.rindex(u"/") + 1]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
-        # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
-        if os.path.exists(save_folder):
-            if int(self.get_modified_date(save_path)) > data[u"lastBackupTime"]:
-                data[u"lastBackupTime"] = int(self.get_modified_date(save_path))
+        if self.get_modified_date(save_path) > data[u"lastBackupTime"]:
+            data[u"lastBackupTime"] = self.get_modified_date(save_path)
 
-                backup = data[u"backupFileNamePrefix"] + u"+" + unicode(data[u"lastBackupTime"]) + u".zip"
-                if not backup_folder.endswith(u"/"): backup_folder = backup_folder + u"/"
-                
-                if text_ctrl is None and use_prompt: print(u"")
-                if os.path.exists(backup_folder + backup):
-                    if backup_folder.endswith(u"/"): backup_folder = backup_folder[:len(backup_folder) - 1]
-                    print(self.add_to_text_ctrl(backup + u" already exists in " + backup_folder.replace(u"/", separator) + u".\nBackup cancelled", text_ctrl))
-                else:
-                    # Create the backup archive file
-                    with ZipFile(backup_folder + backup, u"w") as backup_archive:
-                        print(self.add_to_text_ctrl(u"Creating backup archive: " + backup, text_ctrl))
-                        for folder, subFolders, files in os.walk(save_folder):
-                            for file in files:
-                                print(self.add_to_text_ctrl(u"Added " + file, text_ctrl))
-                                path = os.path.join(folder, file)
-                                backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
-                        if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl(u"Backup successful", text_ctrl))
-                if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
-                # Update the JSON file
-                content = json.dumps(data, indent=4, ensure_ascii=False)
-                if isinstance(content, str): content = content.decode(u"utf-8")
-                open(config_file, u"w", encoding=u"utf-8").write(content)
+            backup = data[u"backupFileNamePrefix"] + u"+" + unicode(data[u"lastBackupTime"]) + u".zip"
+            if not backup_folder.endswith(u"/"): backup_folder = backup_folder + u"/"
+            
+            if text_ctrl is None and use_prompt: print(u"")
+            if os.path.exists(backup_folder + backup):
+                if backup_folder.endswith(u"/"): backup_folder = backup_folder[:len(backup_folder) - 1]
+                print(self.add_to_text_ctrl(backup + u" already exists in " + backup_folder.replace(u"/", separator) + u".\nBackup cancelled", text_ctrl))
+            else:
+                # Create the backup archive file
+                with ZipFile(backup_folder + backup, u"w") as backup_archive:
+                    print(self.add_to_text_ctrl(u"Creating backup archive: " + backup, text_ctrl))
+                    for folder, subFolders, files in os.walk(save_folder):
+                        for file in files:
+                            print(self.add_to_text_ctrl(u"Added " + file, text_ctrl))
+                            path = os.path.join(folder, file)
+                            backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
+                    if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl(u"Backup successful", text_ctrl))
+            if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
+            # Update the JSON file
+            content = json.dumps(data, indent=4, ensure_ascii=False)
+            if isinstance(content, str): content = content.decode(u"utf-8")
+            open(config_file, u"w", encoding=u"utf-8").write(content)
 
 temp_history = TempHistory()
 print = temp_history.print

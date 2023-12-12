@@ -66,10 +66,12 @@ class BackupTool(wx.App):
             index += 1
 
         if no_gui:
+            try: interval = data[u"interval"]
+            except: interval = 0
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig(name=u"Single Config", path=config_path, interval=data[u"interval"]))
+                self.backup_configs.append(BackupConfig(name=u"Single Config", path=config_path, interval=interval))
                 self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print(u"Enter in \"help\" or \"?\" for assistance.")
@@ -80,7 +82,7 @@ class BackupTool(wx.App):
                     config = self.add_or_remove_config(config_path, data[u"configurations"])
                     if config not in self.configs_used:
                         self.configs_used.append(config)
-                        self.backup_configs.append(BackupConfig(config[u"name"], config[u"file"], True, data[u"interval"]))
+                        self.backup_configs.append(BackupConfig(config[u"name"], config[u"file"], True, interval))
                         self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                                     args=(self.stop_queue, None, self, config)))
                         self.backup_threads[len(self.backup_threads) - 1].start()
