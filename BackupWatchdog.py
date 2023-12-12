@@ -21,7 +21,7 @@ class BackupWatchdog:
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + "\n")
         return text
 
-    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt):
+    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt, first_run):
         config_file = self.replace_local_dot_directory("./" + config_file)
         data = json.load(open(config_file, "r"))
 
@@ -40,43 +40,43 @@ class BackupWatchdog:
                 save_path = temp_save_path
                 break
         if save_path is None:
-            if text_ctrl is None and use_prompt: print("")
-            print(self.add_to_text_ctrl("No save file found", text_ctrl))
-            if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
-            if button_config is not None:
-                if text_ctrl is None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index)
-            return True
+            if first_run:
+                if text_ctrl is None and use_prompt: print("")
+                print(self.add_to_text_ctrl("No save file found", text_ctrl))
+                if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
+                if button_config is not None:
+                    if text_ctrl is None: button_config.remove_config(button_index, False)
+                    else: wx.CallAfter(button_config.remove_config, button_index)
+                return True
+            # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
+            return
         save_folder = save_path[:save_path.rindex("/") + 1]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
-        try:
-            if int(self.get_modified_date(save_path)) > data["lastBackupTime"]:
-                data["lastBackupTime"] = int(self.get_modified_date(save_path))
+        if int(self.get_modified_date(save_path)) > data["lastBackupTime"]:
+            data["lastBackupTime"] = int(self.get_modified_date(save_path))
 
-                backup = data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
-                if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
+            backup = data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
+            if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
 
-                if text_ctrl is None and use_prompt: print("")
-                if os.path.exists(backup_folder + backup):
-                    if backup_folder.endswith("/"): backup_folder = backup_folder[:len(backup_folder) - 1]
-                    print(self.add_to_text_ctrl(backup + " already exists in " + backup_folder.replace("/", separator) + ".\nBackup cancelled", text_ctrl))
-                else:
-                    # Create the backup archive file
-                    with ZipFile(backup_folder + backup, "w") as backup_archive:
-                        print(self.add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
-                        for folder, subFolders, files in os.walk(save_folder):
-                            for file in files:
-                                print(self.add_to_text_ctrl("Added " + file, text_ctrl))
-                                path = os.path.join(folder, file)
-                                backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
-                        if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
-                if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
-                # Update the JSON file
-                json.dump(data, open(config_file, "w"), indent=4)
-        # Sometimes on Linux, when Steam launches a game like Bully: Scholarship Edition, the path to the compatdata folder becomes briefly inaccessible.
-        except FileNotFoundError: pass
+            if text_ctrl is None and use_prompt: print("")
+            if os.path.exists(backup_folder + backup):
+                if backup_folder.endswith("/"): backup_folder = backup_folder[:len(backup_folder) - 1]
+                print(self.add_to_text_ctrl(backup + " already exists in " + backup_folder.replace("/", separator) + ".\nBackup cancelled", text_ctrl))
+            else:
+                # Create the backup archive file
+                with ZipFile(backup_folder + backup, "w") as backup_archive:
+                    print(self.add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
+                    for folder, subFolders, files in os.walk(save_folder):
+                        for file in files:
+                            print(self.add_to_text_ctrl("Added " + file, text_ctrl))
+                            path = os.path.join(folder, file)
+                            backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
+                    if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
+            if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
+            # Update the JSON file
+            json.dump(data, open(config_file, "w"), indent=4)
 
 temp_history = TempHistory()
 print = temp_history.print

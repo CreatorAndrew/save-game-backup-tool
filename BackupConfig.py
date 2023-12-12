@@ -14,13 +14,16 @@ class BackupConfig:
         self.stop = False
         self.use_prompt = use_prompt
         self.interval = interval
+        self.first_run = True
 
     def watchdog(self, stop_queue, text_ctrl=None, button_config=None, button_index=None):
         if self.config_path is not None:
             while not os.path.exists(self.stop_backup_file) and self.name not in stop_queue:
                 time.sleep(self.interval)
-                if backup_watchdog.watchdog(self.config_path, text_ctrl, button_config, button_index, self.use_prompt): break
+                if backup_watchdog.watchdog(self.config_path, text_ctrl, button_config, button_index, self.use_prompt, self.first_run): break
+                self.first_run = False
             self.stop = True
+            self.first_run = True
             if os.path.exists(self.stop_backup_file):
                 if text_ctrl is None:
                     if button_index is not None: button_config.remove_config(button_index, False)
