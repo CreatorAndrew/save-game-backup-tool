@@ -17,13 +17,11 @@ class BackupWatchdog:
     def replace_local_dot_directory(self, path): return (path.replace("./", os.path.dirname(executable).replace("\\", "/") + "/")
                                                              .replace("/Save Game Backup Tool.app/Contents/Frameworks", ""))
 
-    def add_to_text_ctrl(self, text, text_ctrl=None):
+    def add_to_text_ctrl(self, text, text_ctrl):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + "\n")
         return text
 
-    def watchdog(self, config_file, text_ctrl=None, button_config=None, button_index=None, use_prompt=False, enabled=True):
-        if not enabled: return
-
+    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt):
         config_file = self.replace_local_dot_directory("./" + config_file)
         data = json.load(open(config_file, "r"))
 

@@ -62,12 +62,12 @@ class BackupGUI(wx.Frame):
         else: self.remove_config(index)
 
     def remove_config(self, index):
+        self.buttons[index].SetLabel("Start")
         self.stop_queue.append(self.backup_configs[self.configs_used.index(self.configs[index])].name)
         while not self.backup_configs[self.configs_used.index(self.configs[index])].stop: pass
         self.stop_queue.remove(self.backup_configs[self.configs_used.index(self.configs[index])].name)
         self.backup_configs.remove(self.backup_configs[self.configs_used.index(self.configs[index])])
         self.configs_used.remove(self.configs_used[self.configs_used.index(self.configs[index])])
-        self.buttons[index].SetLabel("Start")
 
     def on_close(self, event):
         for backup_config in self.backup_configs:
