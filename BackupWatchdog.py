@@ -1,16 +1,15 @@
-from __future__ import with_statement
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import with_statement
+from io import open
+from pathlib2 import Path
+from TempHistory import TempHistory
+import json
 import os
 import sys
 import time
-import json
 import wx
 import zipfile
-from zipfile import ZipFile
-from pathlib2 import Path
-from io import open
-from TempHistory import TempHistory
 
 class BackupWatchdog(object):
     prompt = u"> "
@@ -31,14 +30,12 @@ class BackupWatchdog(object):
 
         save_paths = []
         for save_path in data[u"searchableSavePaths"]: save_paths.append(save_path)
-        if data[u"backupPath"][u"isAbsolute"]: home = u""
-        else: home = unicode(Path.home()) + u"/"
+        home = u"" if data[u"backupPath"][u"isAbsolute"] else unicode(Path.home()) + u"/"
         backup_folder = self.replace_local_dot_directory(home + data[u"backupPath"][u"path"])
 
         save_path = None
         for path in save_paths:
-            if path[u"isAbsolute"]: home = u""
-            else: home = unicode(Path.home()) + u"/"
+            home = u"" if path[u"isAbsolute"] else unicode(Path.home()) + u"/"
             temp_save_path = self.replace_local_dot_directory(home + path[u"path"])
             if os.path.exists(temp_save_path):
                 save_path = temp_save_path
@@ -54,7 +51,7 @@ class BackupWatchdog(object):
                 return True
             # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
             return
-        save_folder = save_path[:save_path.rindex(u"/") + 1]
+        save_folder = save_path[:save_path.rindex(u"/")]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
@@ -70,9 +67,9 @@ class BackupWatchdog(object):
                 print(self.add_to_text_ctrl(backup + u" already exists in " + backup_folder.replace(u"/", separator) + u".\nBackup cancelled", text_ctrl))
             else:
                 # Create the backup archive file
-                with ZipFile(backup_folder + backup, u"w") as backup_archive:
+                with zipfile.ZipFile(backup_folder + backup, u"w") as backup_archive:
                     print(self.add_to_text_ctrl(u"Creating backup archive: " + backup, text_ctrl))
-                    for folder, subFolders, files in os.walk(save_folder):
+                    for folder, sub_folders, files in os.walk(save_folder):
                         for file in files:
                             print(self.add_to_text_ctrl(u"Added " + file, text_ctrl))
                             path = os.path.join(folder, file)
@@ -86,5 +83,4 @@ class BackupWatchdog(object):
 
 temp_history = TempHistory()
 print = temp_history.print
-if sys.platform == u"win32": separator = u"\\"
-else: separator = u"/"
+separator = u"\\" if sys.platform == u"win32" else u"/"
