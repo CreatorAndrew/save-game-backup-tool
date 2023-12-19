@@ -1,12 +1,11 @@
+from pathlib import Path
+from TempHistory import TempHistory
+import json
 import os
 import sys
 import time
-import json
 import wx
 import zipfile
-from zipfile import ZipFile
-from pathlib import Path
-from TempHistory import TempHistory
 
 class BackupWatchdog:
     prompt = "> "
@@ -27,14 +26,12 @@ class BackupWatchdog:
 
         save_paths = []
         for save_path in data["searchableSavePaths"]: save_paths.append(save_path)
-        if data["backupPath"]["isAbsolute"]: home = ""
-        else: home = str(Path.home()) + "/"
+        home = "" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/"
         backup_folder = self.replace_local_dot_directory(home + data["backupPath"]["path"])
 
         save_path = None
         for path in save_paths:
-            if path["isAbsolute"]: home = ""
-            else: home = str(Path.home()) + "/"
+            home = "" if path["isAbsolute"] else str(Path.home()) + "/"
             temp_save_path = self.replace_local_dot_directory(home + path["path"])
             if os.path.exists(temp_save_path):
                 save_path = temp_save_path
@@ -50,7 +47,7 @@ class BackupWatchdog:
                 return True
             # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
             return
-        save_folder = save_path[:save_path.rindex("/") + 1]
+        save_folder = save_path[:save_path.rindex("/")]
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
@@ -66,9 +63,9 @@ class BackupWatchdog:
                 print(self.add_to_text_ctrl(backup + " already exists in " + backup_folder.replace("/", separator) + ".\nBackup cancelled", text_ctrl))
             else:
                 # Create the backup archive file
-                with ZipFile(backup_folder + backup, "w") as backup_archive:
+                with zipfile.ZipFile(backup_folder + backup, "w") as backup_archive:
                     print(self.add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
-                    for folder, subFolders, files in os.walk(save_folder):
+                    for folder, sub_folders, files in os.walk(save_folder):
                         for file in files:
                             print(self.add_to_text_ctrl("Added " + file, text_ctrl))
                             path = os.path.join(folder, file)
@@ -80,7 +77,5 @@ class BackupWatchdog:
 
 temp_history = TempHistory()
 print = temp_history.print
-if sys.platform == "darwin": executable = os.path.abspath(__file__)
-else: executable = sys.executable
-if sys.platform == "win32": separator = "\\"
-else: separator = "/"
+executable = os.path.abspath(__file__) if sys.platform == "darwin" else sys.executable
+separator = "\\" if sys.platform == "win32" else "/"

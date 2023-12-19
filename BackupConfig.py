@@ -1,25 +1,24 @@
+from BackupWatchdog import BackupWatchdog
 import os
 import sys
 import time
 import wx
-from BackupWatchdog import BackupWatchdog
 
 class BackupConfig:
-    def __init__(self, name=None, path=None, use_prompt=False, interval=0):
-        if name is None: return
+    def __init__(self, name, path, interval, use_prompt=False):
         self.name = name
         self.config_path = path
-        self.stop_backup_file = backup_watchdog.replace_local_dot_directory("./.stop" + self.config_path.replace(".json", ""))
-        self.stop = False
-        self.use_prompt = use_prompt
         self.interval = interval
+        self.use_prompt = use_prompt
+        self.stop_backup_file = BackupWatchdog().replace_local_dot_directory("./.stop" + self.config_path.replace(".json", ""))
+        self.stop = False
         self.first_run = True
 
     def watchdog(self, stop_queue, text_ctrl=None, button_config=None, button_index=None):
         if self.config_path is not None:
             while not os.path.exists(self.stop_backup_file) and self.name not in stop_queue:
                 time.sleep(self.interval)
-                if backup_watchdog.watchdog(self.config_path, text_ctrl, button_config, button_index, self.use_prompt, self.first_run): break
+                if BackupWatchdog().watchdog(self.config_path, text_ctrl, button_config, button_index, self.use_prompt, self.first_run): break
                 self.first_run = False
             self.stop = True
             self.first_run = True
@@ -31,5 +30,3 @@ class BackupConfig:
                 try: os.remove(self.stop_backup_file)
                 except: pass
             if button_index is None: sys.exit(0)
-
-backup_watchdog = BackupWatchdog()
