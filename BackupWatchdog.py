@@ -17,8 +17,12 @@ class BackupWatchdog(object):
     def get_modified_date(self, path): return int(time.strftime(u"%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path)))))
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
-    def replace_local_dot_directory(self, path): return (path.replace(u"./", os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/") + u"/")
-                                                             .replace(u"/Save Game Backup Tool.app/Contents/MacOS", u""))
+    def replace_local_dot_directory(self, path):
+        temp_path = path
+        executable_path = os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/")
+        if temp_path.startswith(u"./"): temp_path = temp_path.replace(u"./", executable_path + u"/", 1)
+        elif temp_path.startswith(u"../"): temp_path = temp_path.replace(u"../", executable_path[:executable_path.rindex(u"/")] + u"/", 1)
+        return temp_path.replace(u"/Save Game Backup Tool.app/Contents/MacOS", u"")
 
     def add_to_text_ctrl(self, text, text_ctrl):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + u"\n")
