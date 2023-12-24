@@ -65,7 +65,7 @@ class BackupTool(wx.App):
             self.stop_queue = []
             self.stop_backup_tool = False
             if config_path is not None:
-                self.backup_configs.append(BackupConfig("", config_path, interval))
+                self.backup_configs.append(BackupConfig(data["default"], config_path, interval))
                 self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
             else: print("Enter in \"help\" or \"?\" for assistance.")
