@@ -84,7 +84,7 @@ class BackupTool(wx.App):
                 elif choice == "stop":
                     config = self.add_or_remove_config(config_path, data["configurations"])
                     self.remove_config(config)
-                elif choice == "end" or choice == "exit" or choice == "quit": 
+                elif choice == "end" or choice == "exit" or choice == "quit":
                     for backup_config in self.backup_configs:
                         self.stop_queue.append(backup_config.name)
                         while not backup_config.stop: pass
