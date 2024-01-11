@@ -23,8 +23,9 @@ class BackupTool(wx.App):
                         backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"))
             lines = open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"r").readlines()
             for line in lines:
-                lines[lines.index(line)] = line = backup_watchdog.replace_local_dot_directory(line)
-                if u"Exec=" in line: lines[lines.index(line)] = u"Exec=\"" + line.replace(u"Exec=", u"").replace(u"\n", u"\"\n")
+                if line.startswith(u"Exec="):
+                    lines[lines.index(line)] = line = u"Exec=\"" + backup_watchdog.replace_local_dot_directory(line.replace(u"Exec=", u"")).replace(u"\n", u"\"\n")
+                elif line.startswith(u"Icon="): lines[lines.index(line)] = line = u"Icon=" + backup_watchdog.replace_local_dot_directory(line.replace(u"Icon=", u""))
             open(backup_watchdog.replace_local_dot_directory(u"./BackupTool.desktop"), u"w").writelines(lines)
             os.system(u"chmod +x ./BackupTool.desktop")
             try: os.remove(unicode(Path.home()) + u"/.local/share/applications/BackupTool.desktop")
