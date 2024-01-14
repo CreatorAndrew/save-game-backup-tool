@@ -14,7 +14,7 @@ import zipfile
 class BackupWatchdog(object):
     prompt = u"> "
 
-    def get_modified_date(self, path): return int(time.strftime(u"%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path)))))
+    def get_modified_time(self, path): return int(time.strftime(u"%Y%m%d%H%M%S", time.strptime(time.ctime(os.path.getmtime(path)))))
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
@@ -29,12 +29,10 @@ class BackupWatchdog(object):
         return text
 
     def watchdog(self, config_file, text_ctrl, use_prompt, first_run):
-        home = u"" if data[u"backupPath"][u"isAbsolute"] else unicode(Path.home()) + u"/"
-        
         config_file = self.replace_local_dot_directory(u"./" + config_file)
-
         data = json.load(open(config_file, u"r"))
 
+        home = u"" if data[u"backupPath"][u"isAbsolute"] else unicode(Path.home()) + u"/"
         backup_folder = self.replace_local_dot_directory(home + data[u"backupPath"][u"path"])
 
         save_path = None
@@ -56,8 +54,8 @@ class BackupWatchdog(object):
 
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
 
-        if self.get_modified_date(save_path) > data[u"lastBackupTime"]:
-            data[u"lastBackupTime"] = self.get_modified_date(save_path)
+        if self.get_modified_time(save_path) > data[u"lastBackupTime"]:
+            data[u"lastBackupTime"] = self.get_modified_time(save_path)
 
             backup = data[u"backupFileNamePrefix"] + u"+" + unicode(data[u"lastBackupTime"]) + u".zip"
             if not backup_folder.endswith(u"/"): backup_folder = backup_folder + u"/"
