@@ -24,7 +24,7 @@ class BackupWatchdog:
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + "\n")
         return text
 
-    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt, first_run):
+    def watchdog(self, config_file, text_ctrl, use_prompt, first_run):
         config_file = self.replace_local_dot_directory("./" + config_file)
         data = json.load(open(config_file, "r"))
 
@@ -45,9 +45,6 @@ class BackupWatchdog:
                 if text_ctrl is None and use_prompt: print("")
                 print(self.add_to_text_ctrl("No save file found", text_ctrl))
                 if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
-                if button_config is not None:
-                    if text_ctrl is None: button_config.remove_config(button_index, False)
-                    else: wx.CallAfter(button_config.remove_config, button_index)
                 return True
             # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
             return

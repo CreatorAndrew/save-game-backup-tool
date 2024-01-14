@@ -1,6 +1,5 @@
 from BackupWatchdog import BackupWatchdog
 import os
-import sys
 import time
 import wx
 
@@ -16,17 +15,16 @@ class BackupConfig:
 
     def watchdog(self, stop_queue, text_ctrl=None, button_config=None, button_index=None):
         if self.config_path is not None:
-            while not os.path.exists(self.stop_backup_file) and self.name not in stop_queue:
+            while self.name not in stop_queue and not self.stop:
                 time.sleep(self.interval)
-                if BackupWatchdog().watchdog(self.config_path, text_ctrl, button_config, button_index, self.use_prompt, self.first_run): break
+                if BackupWatchdog().watchdog(self.config_path, text_ctrl, self.use_prompt, self.first_run) or os.path.exists(self.stop_backup_file):
+                    while os.path.exists(self.stop_backup_file):
+                        try: os.remove(self.stop_backup_file)
+                        except: pass
+                    self.stop = True
+                    if text_ctrl is None:
+                        if button_index is not None: button_config.remove_config(button_index, False)
+                    else: wx.CallAfter(button_config.remove_config, button_index)
                 self.first_run = False
-            self.stop = True
             self.first_run = True
-            if os.path.exists(self.stop_backup_file):
-                if text_ctrl is None:
-                    if button_index is not None: button_config.remove_config(button_index, False)
-                else: wx.CallAfter(button_config.remove_config, button_index)
-            while os.path.exists(self.stop_backup_file):
-                try: os.remove(self.stop_backup_file)
-                except: pass
-            if button_index is None: sys.exit(0)
+            self.stop = True
