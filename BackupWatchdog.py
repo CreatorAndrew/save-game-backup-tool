@@ -28,13 +28,11 @@ class BackupWatchdog:
         config_file = self.replace_local_dot_directory("./" + config_file)
         data = json.load(open(config_file, "r"))
 
-        save_paths = []
-        for save_path in data["searchableSavePaths"]: save_paths.append(save_path)
         home = "" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/"
         backup_folder = self.replace_local_dot_directory(home + data["backupPath"]["path"])
 
         save_path = None
-        for path in save_paths:
+        for path in data["searchableSavePaths"]:
             home = "" if path["isAbsolute"] else str(Path.home()) + "/"
             temp_save_path = self.replace_local_dot_directory(home + path["path"])
             if os.path.exists(temp_save_path):
