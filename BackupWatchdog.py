@@ -25,10 +25,12 @@ class BackupWatchdog:
         return text
 
     def watchdog(self, config_file, text_ctrl, use_prompt, first_run):
+        home = "" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/"
+
         config_file = self.replace_local_dot_directory("./" + config_file)
+
         data = json.load(open(config_file, "r"))
 
-        home = "" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/"
         backup_folder = self.replace_local_dot_directory(home + data["backupPath"]["path"])
 
         save_path = None
