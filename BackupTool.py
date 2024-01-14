@@ -38,11 +38,11 @@ class BackupTool(wx.App):
             shutil.move(backup_watchdog.replace_local_dot_directory("./Save Game Backup Tool.lnk"),
                         backup_watchdog.replace_local_dot_directory(os.getenv("APPDATA")) + "/Microsoft/Windows/Start Menu/Programs")
 
-        self.backup_configs = []
-        self.backup_threads = []
-        self.configs_used = []
-
         data = json.load(open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r"))
+
+        self.backup_threads = []
+        self.backup_configs = []
+        self.configs_used = []
 
         config_path = None
         skip_choice = False

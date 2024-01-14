@@ -9,8 +9,8 @@ class BackupGUI(wx.Frame):
     def __init__(self, *args, **kwds):
         data = json.load(open(BackupWatchdog().replace_local_dot_directory("./MasterConfig.json"), "r"))
 
-        self.backup_configs = []
         self.backup_threads = []
+        self.backup_configs = []
         self.configs = data["configurations"]
         self.configs_used = []
         self.stop_queue = []
