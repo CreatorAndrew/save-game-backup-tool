@@ -28,17 +28,17 @@ class BackupWatchdog(object):
         if text_ctrl is not None: wx.CallAfter(text_ctrl.AppendText, text + u"\n")
         return text
 
-    def watchdog(self, config_file, text_ctrl, button_config, button_index, use_prompt, first_run):
+    def watchdog(self, config_file, text_ctrl, use_prompt, first_run):
+        home = u"" if data[u"backupPath"][u"isAbsolute"] else unicode(Path.home()) + u"/"
+        
         config_file = self.replace_local_dot_directory(u"./" + config_file)
+
         data = json.load(open(config_file, u"r"))
 
-        save_paths = []
-        for save_path in data[u"searchableSavePaths"]: save_paths.append(save_path)
-        home = u"" if data[u"backupPath"][u"isAbsolute"] else unicode(Path.home()) + u"/"
         backup_folder = self.replace_local_dot_directory(home + data[u"backupPath"][u"path"])
 
         save_path = None
-        for path in save_paths:
+        for path in data[u"searchableSavePaths"]:
             home = u"" if path[u"isAbsolute"] else unicode(Path.home()) + u"/"
             temp_save_path = self.replace_local_dot_directory(home + path[u"path"])
             if os.path.exists(temp_save_path):
@@ -49,9 +49,6 @@ class BackupWatchdog(object):
                 if text_ctrl is None and use_prompt: print(u"")
                 print(self.add_to_text_ctrl(u"No save file found", text_ctrl))
                 if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
-                if button_config is not None:
-                    if text_ctrl is None: button_config.remove_config(button_index, False)
-                    else: wx.CallAfter(button_config.remove_config, button_index)
                 return True
             # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
             return
@@ -80,6 +77,7 @@ class BackupWatchdog(object):
                             backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
                     if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl(u"Backup successful", text_ctrl))
             if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
+
             # Update the JSON file
             content = json.dumps(data, indent=4, ensure_ascii=False)
             if isinstance(content, str): content = content.decode(u"utf-8")
