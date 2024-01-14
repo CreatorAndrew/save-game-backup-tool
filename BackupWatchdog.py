@@ -73,6 +73,7 @@ class BackupWatchdog:
                             backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
                     if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
             if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
+
             # Update the JSON file
             json.dump(data, open(config_file, "w"), indent=4)
 
