@@ -16,7 +16,9 @@ class BackupWatchdog:
     def replace_local_dot_directory(self, path):
         temp_path = path
         executable_path = os.path.dirname(os.path.abspath(__file__) if sys.platform == "darwin" else sys.executable).replace("\\", "/")
-        if temp_path.startswith("./"): temp_path = temp_path.replace("./", executable_path + "/", 1)
+        if temp_path == ".": temp_path = executable_path
+        elif temp_path == "..": temp_path = executable_path[:executable_path.rindex("/")]
+        elif temp_path.startswith("./"): temp_path = temp_path.replace("./", executable_path + "/", 1)
         elif temp_path.startswith("../"): temp_path = temp_path.replace("../", executable_path[:executable_path.rindex("/")] + "/", 1)
         return temp_path.replace("/Save Game Backup Tool.app/Contents/Frameworks", "")
 
