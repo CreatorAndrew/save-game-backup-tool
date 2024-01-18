@@ -37,13 +37,10 @@ class BackupTool(wx.App):
             except: pass
             shutil.move(backup_watchdog.replace_local_dot_directory("./Save Game Backup Tool.lnk"),
                         backup_watchdog.replace_local_dot_directory(os.getenv("APPDATA")) + "/Microsoft/Windows/Start Menu/Programs")
-
         data = json.load(open(backup_watchdog.replace_local_dot_directory("./MasterConfig.json"), "r"))
-
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
-
         config_path = None
         skip_choice = False
         no_gui = False
@@ -59,45 +56,45 @@ class BackupTool(wx.App):
                 config_path = sys.argv[index + 1].replace(".json", "") + ".json"
                 break
             index += 1
-
         if no_gui:
             try: interval = data["interval"]
             except: interval = 0
             self.stop_queue = []
             self.stop_backup_tool = False
-            if config_path is not None:
+            if config_path is None:
+                print("Enter in \"help\" or \"?\" for assistance.")
+                while(True):
+                    print(backup_watchdog.prompt, end="")
+                    choice = input()
+                    if choice == "start":
+                        config = self.add_or_remove_config(config_path, data["configurations"])
+                        if config not in self.configs_used:
+                            self.configs_used.append(config)
+                            self.backup_configs.append(BackupConfig(config["name"], config["file"], interval, True))
+                            self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
+                                                                        args=(self.stop_queue, None, self, config)))
+                            self.backup_threads[len(self.backup_threads) - 1].start()
+                        else: print("That configuration is already in use.")
+                    elif choice == "stop":
+                        config = self.add_or_remove_config(config_path, data["configurations"])
+                        self.remove_config(config)
+                    elif choice == "end" or choice == "exit" or choice == "quit":
+                        for backup_config in self.backup_configs:
+                            self.stop_queue.append(backup_config.name)
+                            while not backup_config.stop: pass
+                        self.stop_queue = []
+                        self.backup_configs = []
+                        self.configs_used = []
+                        self.stop_backup_tool = True
+                    elif choice == "help" or choice == "?": print("Enter in \"start\" to initialize a backup configuration.\n" +
+                                                                  "Enter in \"stop\" to suspend a backup configuration.\n" +
+                                                                  "Enter in \"end\", \"exit\", or \"quit\" to shut down this tool.")
+                    elif choice != "": print("Invalid command")
+                    if self.stop_backup_tool: break
+            else:
                 self.backup_configs.append(BackupConfig(data["default"], config_path, interval))
                 self.backup_threads.append(threading.Thread(target=self.backup_configs[0].watchdog, args=(self.stop_queue,)))
                 self.backup_threads[0].start()
-            else: print("Enter in \"help\" or \"?\" for assistance.")
-            while config_path is None:
-                print(backup_watchdog.prompt, end="")
-                choice = input()
-                if choice == "start":
-                    config = self.add_or_remove_config(config_path, data["configurations"])
-                    if config not in self.configs_used:
-                        self.configs_used.append(config)
-                        self.backup_configs.append(BackupConfig(config["name"], config["file"], interval, True))
-                        self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
-                                                                    args=(self.stop_queue, None, self, config)))
-                        self.backup_threads[len(self.backup_threads) - 1].start()
-                    else: print("That configuration is already in use.")
-                elif choice == "stop":
-                    config = self.add_or_remove_config(config_path, data["configurations"])
-                    self.remove_config(config)
-                elif choice == "end" or choice == "exit" or choice == "quit":
-                    for backup_config in self.backup_configs:
-                        self.stop_queue.append(backup_config.name)
-                        while not backup_config.stop: pass
-                    self.stop_queue = []
-                    self.backup_configs = []
-                    self.configs_used = []
-                    self.stop_backup_tool = True
-                elif choice == "help" or choice == "?": print("Enter in \"start\" to initialize a backup configuration.\n" +
-                                                              "Enter in \"stop\" to suspend a backup configuration.\n" +
-                                                              "Enter in \"end\", \"exit\", or \"quit\" to shut down this tool.")
-                elif choice != "": print("Invalid command")
-                if self.stop_backup_tool: break
         else:
             app = wx.App()
             frame = BackupGUI(None, wx.ID_ANY, "")

@@ -15,7 +15,7 @@ class BackupWatchdog:
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
         temp_path = path
-        executable_path = os.path.dirname(executable).replace("\\", "/")
+        executable_path = os.path.dirname(os.path.abspath(__file__) if sys.platform == "darwin" else sys.executable).replace("\\", "/")
         if temp_path.startswith("./"): temp_path = temp_path.replace("./", executable_path + "/", 1)
         elif temp_path.startswith("../"): temp_path = temp_path.replace("../", executable_path[:executable_path.rindex("/")] + "/", 1)
         return temp_path.replace("/Save Game Backup Tool.app/Contents/Frameworks", "")
@@ -27,14 +27,10 @@ class BackupWatchdog:
     def watchdog(self, config_file, text_ctrl, use_prompt, first_run):
         config_file = self.replace_local_dot_directory("./" + config_file)
         data = json.load(open(config_file, "r"))
-
-        home = "" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/"
-        backup_folder = self.replace_local_dot_directory(home + data["backupPath"]["path"])
-
+        backup_folder = self.replace_local_dot_directory(("" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/") + data["backupPath"]["path"])
         save_path = None
         for path in data["searchableSavePaths"]:
-            home = "" if path["isAbsolute"] else str(Path.home()) + "/"
-            temp_save_path = self.replace_local_dot_directory(home + path["path"])
+            temp_save_path = self.replace_local_dot_directory(("" if path["isAbsolute"] else str(Path.home()) + "/") + path["path"])
             if os.path.exists(temp_save_path):
                 save_path = temp_save_path
                 break
@@ -47,19 +43,17 @@ class BackupWatchdog:
             # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
             return
         save_folder = save_path[:save_path.rindex("/")]
-
         if not os.path.exists(backup_folder): os.makedirs(backup_folder)
-
         if self.get_modified_time(save_path) > data["lastBackupTime"]:
             data["lastBackupTime"] = self.get_modified_time(save_path)
-
             backup = data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
-            if not backup_folder.endswith("/"): backup_folder = backup_folder + "/"
-
             if text_ctrl is None and use_prompt: print("")
-            if os.path.exists(backup_folder + backup):
-                if backup_folder.endswith("/"): backup_folder = backup_folder[:len(backup_folder) - 1]
-                print(self.add_to_text_ctrl(backup + " already exists in " + backup_folder.replace("/", separator) + ".\nBackup cancelled", text_ctrl))
+            if os.path.exists(os.path.join(backup_folder, backup)):
+                print(self.add_to_text_ctrl(backup +
+                                            " already exists in " +
+                                            backup_folder[:-1 if backup_folder.endswith("/") else 0:].replace("/", "\\" if sys.platform == "win32" else "/") +
+                                            ".\nBackup cancelled",
+                                            text_ctrl))
             else:
                 # Create the backup archive file
                 with zipfile.ZipFile(backup_folder + backup, "w") as backup_archive:
@@ -71,11 +65,8 @@ class BackupWatchdog:
                             backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
                     if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
             if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
-
             # Update the JSON file
             json.dump(data, open(config_file, "w"), indent=4)
 
 temp_history = TempHistory()
 print = temp_history.print
-executable = os.path.abspath(__file__) if sys.platform == "darwin" else sys.executable
-separator = "\\" if sys.platform == "win32" else "/"
