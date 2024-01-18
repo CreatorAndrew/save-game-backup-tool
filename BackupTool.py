@@ -68,13 +68,13 @@ class BackupTool(wx.App):
                     choice = input()
                     if choice == "start":
                         config = self.add_or_remove_config(config_path, data["configurations"])
-                        if config not in self.configs_used:
+                        if config in self.configs_used: print("That configuration is already in use.")
+                        else:
                             self.configs_used.append(config)
                             self.backup_configs.append(BackupConfig(config["name"], config["file"], interval, True))
                             self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                                         args=(self.stop_queue, None, self, config)))
                             self.backup_threads[len(self.backup_threads) - 1].start()
-                        else: print("That configuration is already in use.")
                     elif choice == "stop":
                         config = self.add_or_remove_config(config_path, data["configurations"])
                         self.remove_config(config)

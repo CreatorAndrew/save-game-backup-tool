@@ -49,14 +49,14 @@ class BackupGUI(wx.Frame):
 
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
-        if self.configs[index] not in self.configs_used:
+        if self.configs[index] in self.configs_used: self.remove_config(index)
+        else:
             self.configs_used.append(self.configs[index])
             self.backup_configs.append(BackupConfig(self.configs[index]["name"], self.configs[index]["file"], self.interval))
             self.backup_threads.append(threading.Thread(target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
                                                         args=(self.stop_queue, self.text_ctrl, self, index)))
             self.backup_threads[len(self.backup_threads) - 1].start()
             self.buttons[index].SetLabel("Stop")
-        else: self.remove_config(index)
 
     def remove_config(self, index):
         self.buttons[index].SetLabel("Start")
