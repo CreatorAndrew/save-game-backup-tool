@@ -53,7 +53,7 @@ class BackupWatchdog:
             if os.path.exists(os.path.join(backup_folder, backup)):
                 print(self.add_to_text_ctrl(backup +
                                             " already exists in " +
-                                            backup_folder[:-1 if backup_folder.endswith("/") else 0:].replace("/", "\\" if sys.platform == "win32" else "/") +
+                                            backup_folder[:-1 if backup_folder.endswith("/") else None].replace("/", "\\" if sys.platform == "win32" else "/") +
                                             ".\nBackup cancelled",
                                             text_ctrl))
             else:
