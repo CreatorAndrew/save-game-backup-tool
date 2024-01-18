@@ -78,4 +78,3 @@ class BackupWatchdog(object):
 
 temp_history = TempHistory()
 print = temp_history.print
-separator = u"\\" if sys.platform == u"win32" else u"/"
