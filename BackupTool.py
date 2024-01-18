@@ -63,7 +63,7 @@ class BackupTool(wx.App):
             self.stop_backup_tool = False
             if config_path is None:
                 print("Enter in \"help\" or \"?\" for assistance.")
-                while(True):
+                while True:
                     print(backup_watchdog.prompt, end="")
                     choice = input()
                     if choice == "start":
