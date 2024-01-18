@@ -58,14 +58,14 @@ class BackupWatchdog:
                                             text_ctrl))
             else:
                 # Create the backup archive file
-                with zipfile.ZipFile(backup_folder + backup, "w") as backup_archive:
+                with zipfile.ZipFile(os.path.join(backup_folder, backup), "w") as backup_archive:
                     print(self.add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
                     for folder, sub_folders, files in os.walk(save_folder):
                         for file in files:
                             print(self.add_to_text_ctrl("Added " + file, text_ctrl))
                             path = os.path.join(folder, file)
                             backup_archive.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
-                    if os.path.exists(backup_folder + backup): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
+                    if os.path.exists(os.path.join(backup_folder, backup)): print(self.add_to_text_ctrl("Backup successful", text_ctrl))
             if text_ctrl is None and use_prompt: print(self.prompt, end="", flush=True)
             # Update the JSON file
             json.dump(data, open(config_file, "w"), indent=4)
