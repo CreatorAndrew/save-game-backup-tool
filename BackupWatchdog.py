@@ -72,9 +72,7 @@ class BackupWatchdog(object):
                     if os.path.exists(os.path.join(backup_folder, backup)): print(self.add_to_text_ctrl(u"Backup successful", text_ctrl))
             if text_ctrl is None and use_prompt: print(self.prompt, end=u"", flush=True)
             # Update the JSON file
-            content = json.dumps(data, indent=4, ensure_ascii=False)
-            if isinstance(content, str): content = content.decode(u"utf-8")
-            open(config_file, u"w", encoding=u"utf-8").write(content)
+            open(config_file, u"w", encoding=u"utf-8").write(json.dumps(data, indent=4, ensure_ascii=False).decode(u"utf-8"))
 
 temp_history = TempHistory()
 print = temp_history.print
