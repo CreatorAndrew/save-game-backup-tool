@@ -1,6 +1,6 @@
 pyinstaller --windowed --icon=BackupTool.ico BackupTool.py
-copy *.json dist\BackupTool
 copy BackupTool.bat dist\BackupTool
+copy *.json dist\BackupTool
 copy *.ico dist\BackupTool
 copy LICENSE dist\BackupTool
 mkdir dist\BackupTool\Test
