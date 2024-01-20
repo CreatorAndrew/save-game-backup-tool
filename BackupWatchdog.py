@@ -21,7 +21,7 @@ class BackupWatchdog(object):
         temp_path = path
         executable_path = os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/")
         if temp_path == u".": temp_path = executable_path
-        elif temp_path == u"..": temp_path = executable_path[:executable_path.rindex("/")]
+        elif temp_path == u"..": temp_path = executable_path[:executable_path.rindex(u"/")]
         elif temp_path.startswith(u"./"): temp_path = temp_path.replace(u"./", executable_path + u"/", 1)
         elif temp_path.startswith(u"../"): temp_path = temp_path.replace(u"../", executable_path[:executable_path.rindex(u"/")] + u"/", 1)
         return temp_path.replace(u"/Save Game Backup Tool.app/Contents/MacOS", u"")
