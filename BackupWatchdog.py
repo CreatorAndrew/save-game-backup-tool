@@ -18,7 +18,7 @@ class BackupWatchdog(object):
 
     # This method makes it so that this program treats the filesystem as relative to its own path.
     def replace_local_dot_directory(self, path):
-        temp_path = path
+        temp_path = path.replace(u"\\", u"/")
         executable_path = os.path.dirname(os.path.abspath(__file__)).replace(u"\\", u"/")
         if temp_path == u".": temp_path = executable_path
         elif temp_path == u"..": temp_path = executable_path[:executable_path.rindex(u"/")]
