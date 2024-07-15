@@ -23,7 +23,7 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
     save_path = None
     for searchable_save_path in data["searchableSavePaths"]:
         temp_save_path = apply_working_directory(
-            ("" if searchable_save_path["isAbsolute"] else (str(Path.home()) + "/"))
+            ("" if searchable_save_path["isAbsolute"] else str(Path.home()) + "/")
             + searchable_save_path["path"]
         )
         if exists(temp_save_path):
