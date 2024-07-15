@@ -2,9 +2,12 @@ altgraph==0.17.4
 macholib==1.16.3
 numpy==2.0.0
 packaging==24.1
+pefile==2023.2.7
 pillow==10.3.0
 pyinstaller==6.9.0
 pyinstaller-hooks-contrib==2024.7
+pywin32==306
+pywin32-ctypes==0.2.2
 six==1.16.0
 winshell==0.6
 wxPython==4.2.1
