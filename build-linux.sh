@@ -1,4 +1,4 @@
-pyinstaller --onefile BackupTool.py
+python -m PyInstaller --onefile backup_tool.py -n BackupTool
 cp .BackupTool.desktop dist
 cp *.json dist
 cp *.ico dist
