@@ -6,8 +6,8 @@ copy LICENSE.md dist\BackupTool
 mkdir dist\BackupTool\Test
 copy Test\Test.txt dist\BackupTool\Test
 move dist\BackupTool .\"Save Game Backup Tool"
-pyinstaller --icon=BackupTool.ico BackupTool.py
-copy dist\BackupTool\BackupTool.exe "Save Game Backup Tool\BackupTool (Console).exe"
+pyinstaller --icon=BackupTool.ico backup_tool.py
+copy dist\BackupTool\backup_tool.exe "Save Game Backup Tool\BackupTool (Console).exe"
 7z a save-game-backup-tool-win32-i386.zip "Save Game Backup Tool"
 rmdir /s /q dist
 rmdir /s /q build
