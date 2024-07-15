@@ -2,7 +2,7 @@ python -m PyInstaller --windowed --icon=BackupTool.ico backup_tool.py -n BackupT
 copy BackupTool.bat dist\BackupTool
 copy *.json dist\BackupTool
 copy *.ico dist\BackupTool
-copy LICENSE dist\BackupTool
+copy LICENSE.md dist\BackupTool
 mkdir dist\BackupTool\Test
 copy Test\Test.txt dist\BackupTool\Test
 move dist\BackupTool .\"Save Game Backup Tool"

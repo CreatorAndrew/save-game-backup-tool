@@ -5,7 +5,7 @@ codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Ma
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/BackupTool
 cp *.command dist
 cp *.json dist
-cp LICENSE dist
+cp LICENSE.md dist
 cp -r Test dist/Test
 rm -rf dist/BackupTool
 mv dist/BackupTool.app dist/Save\ Game\ Backup\ Tool.app
