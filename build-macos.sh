@@ -1,4 +1,4 @@
-python2 -m PyInstaller --noconsole --icon=BackupTool.png BackupTool.py
+python -m PyInstaller --noconsole --icon=BackupTool.png backup_tool.py -n BackupTool
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/*.dylib
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/*.so
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/Python

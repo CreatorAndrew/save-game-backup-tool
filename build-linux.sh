@@ -1,4 +1,4 @@
-pyinstaller BackupTool.py
+python -m PyInstaller backup_tool.py -n BackupTool
 cp .BackupTool.desktop dist/BackupTool
 cp *.json dist/BackupTool
 cp *.ico dist/BackupTool
