@@ -31,11 +31,7 @@ from wx import (
 
 class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
-        data = load(
-            open(
-                apply_working_directory("./MasterConfig.json"), "r"
-            )
-        )
+        data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         self.backup_threads = []
         self.backup_configs = []
         self.configs = data["configurations"]
@@ -51,11 +47,7 @@ class BackupGUI(Frame):
         height = 384
         self.SetTitle("Save Game Backup Tool")
         if platform != "darwin":
-            self.SetIcon(
-                Icon(
-                    apply_working_directory("./BackupTool.ico")
-                )
-            )
+            self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
         self.panel = Panel(self, ID_ANY)
         sizer = BoxSizer(VERTICAL)
         grid = GridSizer(len(self.configs), 2, 0, 0)

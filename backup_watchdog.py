@@ -14,11 +14,8 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 def get_modified_time(path):
-        return int(
-            strftime(
-                "%Y%m%d%H%M%S", strptime(ctime(getmtime(path)))
-            )
-        )
+    return int(strftime("%Y%m%d%H%M%S", strptime(ctime(getmtime(path)))))
+
 
 def watchdog(config_file, text_ctrl, use_prompt, first_run):
     config_file = apply_working_directory("./" + config_file)
@@ -52,10 +49,7 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
     if get_modified_time(save_path) > data["lastBackupTime"]:
         data["lastBackupTime"] = get_modified_time(save_path)
         backup = (
-            data["backupFileNamePrefix"]
-            + "+"
-            + str(data["lastBackupTime"])
-            + ".zip"
+            data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
         )
         if text_ctrl is None and use_prompt:
             print("")
@@ -73,14 +67,8 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
             )
         else:
             # Create the backup archive file
-            with ZipFile(
-                join(backup_folder, backup), "w"
-            ) as backup_archive:
-                print(
-                    add_to_text_ctrl(
-                        "Creating backup archive: " + backup, text_ctrl
-                    )
-                )
+            with ZipFile(join(backup_folder, backup), "w") as backup_archive:
+                print(add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
                 for folder, sub_folders, files in walk(save_folder):
                     for file in files:
                         print(add_to_text_ctrl("Added " + file, text_ctrl))

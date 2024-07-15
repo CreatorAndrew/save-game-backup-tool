@@ -16,7 +16,7 @@ else:
     import readline
 
 
-class TempHistory():
+class TempHistory:
     def __init__(self):
         self.line = "\n"
         self.builtin_print = print

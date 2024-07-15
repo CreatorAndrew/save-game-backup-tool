@@ -37,31 +37,22 @@ class BackupTool(App):
                 if line.startswith("Exec="):
                     lines[lines.index(line)] = line = (
                         'Exec="'
-                        + apply_working_directory(
-                            line.replace("Exec=", "")
-                        ).replace("\n", '"\n')
-                    )
-                elif line.startswith("Icon="):
-                    lines[lines.index(line)] = line = (
-                        "Icon="
-                        + apply_working_directory(
-                            line.replace("Icon=", "")
+                        + apply_working_directory(line.replace("Exec=", "")).replace(
+                            "\n", '"\n'
                         )
                     )
-            open(
-                apply_working_directory("./BackupTool.desktop"), "w"
-            ).writelines(lines)
+                elif line.startswith("Icon="):
+                    lines[lines.index(line)] = line = "Icon=" + apply_working_directory(
+                        line.replace("Icon=", "")
+                    )
+            open(apply_working_directory("./BackupTool.desktop"), "w").writelines(lines)
             chmod(
                 apply_working_directory("./BackupTool.desktop"),
-                stat(
-                    apply_working_directory("./BackupTool.desktop")
-                ).st_mode
-                | 0111,
+                stat(apply_working_directory("./BackupTool.desktop")).st_mode | 0111,
             )
             try:
                 remove(
-                    str(Path.home())
-                    + "/.local/share/applications/BackupTool.desktop"
+                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop"
                 )
             except:
                 pass
@@ -71,9 +62,7 @@ class BackupTool(App):
             )
         if platform == "win32":
             CreateShortcut(
-                Path=apply_working_directory(
-                    "./Save Game Backup Tool.lnk"
-                ),
+                Path=apply_working_directory("./Save Game Backup Tool.lnk"),
                 Target=apply_working_directory("./BackupTool.exe"),
                 Icon=(
                     apply_working_directory("./BackupTool.exe"),
@@ -88,34 +77,23 @@ class BackupTool(App):
             except:
                 try:
                     remove(
-                        apply_working_directory(
-                            str(Path.home())
-                        )
+                        apply_working_directory(str(Path.home()))
                         + "/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
                     pass
             try:
                 move(
-                    apply_working_directory(
-                        "./Save Game Backup Tool.lnk"
-                    ),
+                    apply_working_directory("./Save Game Backup Tool.lnk"),
                     apply_working_directory(getenv("APPDATA"))
                     + "/Microsoft/Windows/Start Menu/Programs",
                 )
             except:
                 move(
-                    apply_working_directory(
-                        "./Save Game Backup Tool.lnk"
-                    ),
-                    apply_working_directory(str(Path.home()))
-                    + "/Start Menu/Programs",
+                    apply_working_directory("./Save Game Backup Tool.lnk"),
+                    apply_working_directory(str(Path.home())) + "/Start Menu/Programs",
                 )
-        data = load(
-            open(
-                apply_working_directory("./MasterConfig.json"), "r"
-            )
-        )
+        data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
@@ -215,7 +193,10 @@ class BackupTool(App):
                 self.backup_configs[self.configs_used.index(config)].name
             )
             while (
-                wait and self.backup_configs[self.configs_used.index(config)].continue_running
+                wait
+                and self.backup_configs[
+                    self.configs_used.index(config)
+                ].continue_running
             ):
                 pass
             self.stop_queue.remove(

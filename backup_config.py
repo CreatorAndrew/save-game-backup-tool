@@ -7,7 +7,7 @@ from time import sleep
 from wx import CallAfter
 
 
-class BackupConfig():
+class BackupConfig:
     def __init__(self, name, path, interval, use_prompt=False):
         self.name = name
         self.config_path = path
