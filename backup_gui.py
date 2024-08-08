@@ -60,7 +60,7 @@ class BackupGUI(Frame):
             self.buttons.append(Button(self.panel, index, "Start"))
             labels.append(
                 StaticText(
-                    self.panel, index, self.configs[index]["name"].replace("&", "&&")
+                    self.panel, index, self.configs[index]["title"].replace("&", "&&")
                 )
             )
             grid.Add(labels[len(labels) - 1], 0, ALIGN_CENTER, 0)
@@ -93,8 +93,8 @@ class BackupGUI(Frame):
             self.configs_used.append(self.configs[index])
             self.backup_configs.append(
                 BackupConfig(
+                    self.configs[index]["title"],
                     self.configs[index]["name"],
-                    self.configs[index]["file"],
                     self.interval,
                 )
             )

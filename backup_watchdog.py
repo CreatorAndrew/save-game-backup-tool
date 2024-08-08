@@ -6,7 +6,7 @@ from io import open
 from pathlib2 import Path
 from temp_history import TempHistory
 from json import dumps, load
-from os import makedirs, walk
+from os import listdir, makedirs, walk
 from os.path import basename, exists, getmtime, join
 from sys import platform
 from time import ctime, strftime, strptime
@@ -18,16 +18,26 @@ def get_modified_time(path):
 
 
 def watchdog(config_file, text_ctrl, use_prompt, first_run):
-    config_file = apply_working_directory("./" + config_file)
+    for file in listdir(apply_working_directory(".")):
+        if (
+            file.lower().endswith(".json")
+            and file.lower() == config_file.lower().replace(".json", "") + ".json"
+        ):
+            config_file = apply_working_directory("./" + file)
+            break
     data = load(open(config_file, "r"))
     backup_folder = apply_working_directory(
-        ("" if data["backupPath"]["isAbsolute"] else str(Path.home()) + "/")
+        (str(Path.home()) + "/" if data["backupPath"]["startsWithUserPath"] else "")
         + data["backupPath"]["path"]
     )
     save_path = None
     for searchable_save_path in data["searchableSavePaths"]:
         temp_save_path = apply_working_directory(
-            ("" if searchable_save_path["isAbsolute"] else str(Path.home()) + "/")
+            (
+                str(Path.home()) + "/"
+                if searchable_save_path["startsWithUserPath"]
+                else ""
+            )
             + searchable_save_path["path"]
         )
         if exists(temp_save_path):

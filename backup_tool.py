@@ -7,93 +7,88 @@ from io import open
 from pathlib2 import Path
 from temp_history import TempHistory
 from json import load
-from os import chmod, getenv, remove, stat, system
-from os.path import exists
+from os import listdir
 from sys import argv, platform
 from threading import Thread
 from wx import App, ID_ANY
 
-if platform != "darwin":
-    from shutil import copy, move
-if platform == "win32":
-    from winshell import CreateShortcut
-
 
 class BackupTool(App):
     def main(self):
+        data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         if platform == "darwin":
+            from os import system
+
             system("clear")
-        if platform == "linux" and exists(
-            apply_working_directory("./.BackupTool.desktop")
-        ):
-            copy(
-                apply_working_directory("./.BackupTool.desktop"),
-                apply_working_directory("./BackupTool.desktop"),
-            )
-            lines = open(
-                apply_working_directory("./BackupTool.desktop"), "r"
-            ).readlines()
-            for line in lines:
-                if line.startswith("Exec="):
-                    lines[lines.index(line)] = line = (
-                        'Exec="'
-                        + apply_working_directory(line.replace("Exec=", "")).replace(
-                            "\n", '"\n'
+        elif data.get("createShortcut") is not None and data["createShortcut"]:
+            from os import remove, rename
+
+            if platform == "linux":
+                from os import chmod, stat
+
+                lines = [
+                    "[Desktop Entry]\n",
+                    "Type=Application\n",
+                    "Categories=Game;Utility\n",
+                    "Name=Save Game Backup Tool\n",
+                    "Exec=./BackupTool\n",
+                    "Icon=./BackupTool.ico\n",
+                ]
+                for line in lines:
+                    if line.startswith("Exec="):
+                        lines[lines.index(line)] = line = (
+                            'Exec="'
+                            + apply_working_directory(
+                                line.replace("Exec=", "")
+                            ).replace("\n", '"\n')
                         )
-                    )
-                elif line.startswith("Icon="):
-                    lines[lines.index(line)] = line = "Icon=" + apply_working_directory(
-                        line.replace("Icon=", "")
-                    )
-            open(apply_working_directory("./BackupTool.desktop"), "w").writelines(lines)
-            chmod(
-                apply_working_directory("./BackupTool.desktop"),
-                stat(apply_working_directory("./BackupTool.desktop")).st_mode | 0111,
-            )
-            try:
-                remove(
-                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop"
+                    elif line.startswith("Icon="):
+                        lines[lines.index(line)] = line = (
+                            "Icon=" + apply_working_directory(line.replace("Icon=", ""))
+                        )
+                open(apply_working_directory("./BackupTool.desktop"), "w").writelines(
+                    lines
                 )
-            except:
-                pass
-            move(
-                apply_working_directory("./BackupTool.desktop"),
-                str(Path.home()) + "/.local/share/applications",
-            )
-        if platform == "win32":
-            CreateShortcut(
-                Path=apply_working_directory("./Save Game Backup Tool.lnk"),
-                Target=apply_working_directory("./BackupTool.exe"),
-                Icon=(
-                    apply_working_directory("./BackupTool.exe"),
-                    0,
-                ),
-            )
-            try:
-                remove(
-                    apply_working_directory(getenv("APPDATA"))
-                    + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
+                chmod(
+                    apply_working_directory("./BackupTool.desktop"),
+                    stat(apply_working_directory("./BackupTool.desktop")).st_mode
+                    | 0o0111,
                 )
-            except:
                 try:
                     remove(
-                        apply_working_directory(str(Path.home()))
-                        + "/Start Menu/Programs/Save Game Backup Tool.lnk"
+                        str(Path.home())
+                        + "/.local/share/applications/BackupTool.desktop"
                     )
                 except:
                     pass
-            try:
-                move(
+                rename(
+                    apply_working_directory("./BackupTool.desktop"),
+                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop",
+                )
+            if platform == "win32":
+                from os import getenv
+                from winshell import CreateShortcut
+
+                CreateShortcut(
+                    Path=apply_working_directory("./Save Game Backup Tool.lnk"),
+                    Target=apply_working_directory("./BackupTool.exe"),
+                    Icon=(
+                        apply_working_directory("./BackupTool.exe"),
+                        0,
+                    ),
+                )
+                try:
+                    remove(
+                        apply_working_directory(getenv("APPDATA"))
+                        + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
+                    )
+                except:
+                    pass
+                rename(
                     apply_working_directory("./Save Game Backup Tool.lnk"),
                     apply_working_directory(getenv("APPDATA"))
-                    + "/Microsoft/Windows/Start Menu/Programs",
+                    + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
                 )
-            except:
-                move(
-                    apply_working_directory("./Save Game Backup Tool.lnk"),
-                    apply_working_directory(str(Path.home())) + "/Start Menu/Programs",
-                )
-        data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
@@ -108,11 +103,18 @@ class BackupTool(App):
         if skip_choice:
             for config in data["configurations"]:
                 if config["name"] == data["default"]:
-                    config_path = config["file"]
+                    config_path = config["name"]
         index = 0
         while index < len(argv) and not skip_choice:
             if argv[index].lower() == "--config" and index < len(argv) - 1:
-                config_path = argv[index + 1].replace(".json", "") + ".json"
+                for file in listdir(apply_working_directory(".")):
+                    if (
+                        file.lower().endswith(".json")
+                        and file.lower()
+                        == argv[index + 1].lower().replace(".json", "") + ".json"
+                    ):
+                        config_path = file
+                        break
                 break
             index += 1
         if no_gui:
@@ -214,7 +216,7 @@ class BackupTool(App):
             print("Select one of the following configurations:")
             index = 0
             for config in configs:
-                print("    " + str(index) + ": " + config["name"])
+                print("    " + str(index) + ": " + config["title"])
                 index += 1
             choice = None
             while choice is None:
