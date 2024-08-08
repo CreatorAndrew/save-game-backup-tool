@@ -69,6 +69,7 @@ class BackupTool(App):
                 from os import getenv
                 from winshell import CreateShortcut
 
+            if platform == "win32":
                 CreateShortcut(
                     Path=apply_working_directory("./Save Game Backup Tool.lnk"),
                     Target=apply_working_directory("./BackupTool.exe"),
@@ -83,12 +84,24 @@ class BackupTool(App):
                         + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
-                    pass
-                rename(
-                    apply_working_directory("./Save Game Backup Tool.lnk"),
-                    apply_working_directory(getenv("APPDATA"))
-                    + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
-                )
+                    try:
+                        remove(
+                            apply_working_directory(str(Path.home()))
+                            + "/Start Menu/Programs/Save Game Backup Tool.lnk"
+                        )
+                    except:
+                        pass
+                try:
+                    rename(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(getenv("APPDATA"))
+                        + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
+                    )
+                except:
+                    rename(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(str(Path.home())) + "/Start Menu/Programs/Save Game Backup Tool.lnk",
+                    )
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
