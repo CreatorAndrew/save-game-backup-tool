@@ -151,7 +151,7 @@ class BackupTool(App):
                             self.configs_used.append(config)
                             self.backup_configs.append(
                                 BackupConfig(
-                                    config["name"], config["file"], interval, True
+                                    config["title"], config["name"], interval, True
                                 )
                             )
                             self.backup_threads.append(
