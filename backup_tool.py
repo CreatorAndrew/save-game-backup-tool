@@ -69,7 +69,6 @@ class BackupTool(App):
                 from os import getenv
                 from winshell import CreateShortcut
 
-            if platform == "win32":
                 CreateShortcut(
                     Path=apply_working_directory("./Save Game Backup Tool.lnk"),
                     Target=apply_working_directory("./BackupTool.exe"),
