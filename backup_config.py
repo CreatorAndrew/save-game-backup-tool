@@ -13,7 +13,14 @@ class BackupConfig:
         self.interval = interval
         self.use_prompt = use_prompt
         self.stop_backup_file = apply_working_directory(
-            "./.stop" + self.config_path.replace(".json", "")
+            "./.stop"
+            + path[
+                : (
+                    path.lower().rindex(".json")
+                    if path.lower().endswith(".json")
+                    else None
+                )
+            ]
         )
         self.continue_running = True
         self.first_run = True

@@ -1,5 +1,5 @@
 from os.path import abspath, dirname
-from sys import platform, executable
+from sys import executable, platform
 from wx import CallAfter
 
 PROMPT = "> "
