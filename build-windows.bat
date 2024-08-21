@@ -1,4 +1,4 @@
-python -m PyInstaller --onefile --icon=BackupTool.ico backup_tool.py -n BackupTool
+python -m PyInstaller --onefile --hide-console hide-early --icon=BackupTool.ico backup_tool.py -n BackupTool
 copy BackupTool.bat dist
 copy *.json dist
 copy *.ico dist
