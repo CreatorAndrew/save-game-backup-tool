@@ -21,9 +21,9 @@ class TempHistory:
         self.line = "\n"
         self.builtin_print = print
         try:
-            self.builtin_input = input
-        except:
             self.builtin_input = raw_input
+        except:
+            self.builtin_input = input
 
     def _record(self, text):
         if text == "":
