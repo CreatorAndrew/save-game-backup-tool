@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from backup_utils import apply_working_directory
 from backup_watchdog import watchdog
 from os import remove

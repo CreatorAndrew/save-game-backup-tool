@@ -1,13 +1,20 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from backup_config import BackupConfig
 from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
-from pathlib import Path
+from io import open
 from temp_history import TempHistory
 from json import load
 from os import listdir
 from sys import argv, platform
 from threading import Thread
 from wx import App, ID_ANY
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
 
 
 class BackupTool(App):
@@ -80,12 +87,25 @@ class BackupTool(App):
                         + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
-                    pass
-                rename(
-                    apply_working_directory("./Save Game Backup Tool.lnk"),
-                    apply_working_directory(getenv("APPDATA"))
-                    + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
-                )
+                    try:
+                        remove(
+                            apply_working_directory(str(Path.home()))
+                            + "/Start Menu/Programs/Save Game Backup Tool.lnk"
+                        )
+                    except:
+                        pass
+                try:
+                    rename(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(getenv("APPDATA"))
+                        + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
+                    )
+                except:
+                    rename(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(str(Path.home()))
+                        + "/Start Menu/Programs/Save Game Backup Tool.lnk",
+                    )
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
@@ -98,9 +118,7 @@ class BackupTool(App):
             elif arg.lower() == "--skip-choice":
                 skip_choice = True
         if skip_choice:
-            for config in data["configurations"]:
-                if config["name"] == data["default"]:
-                    config_path = config["name"]
+            config_path = data["default"]
         index = 0
         while index < len(argv) and not skip_choice:
             if argv[index].lower() == "--config" and index < len(argv) - 1:

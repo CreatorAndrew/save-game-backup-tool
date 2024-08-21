@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from sys import platform, stdout
 
 if platform == "win32":
@@ -18,7 +20,10 @@ class TempHistory:
     def __init__(self):
         self.line = "\n"
         self.builtin_print = print
-        self.builtin_input = input
+        try:
+            self.builtin_input = input
+        except:
+            self.builtin_input = raw_input
 
     def _record(self, text):
         if text == "":
@@ -43,8 +48,35 @@ class TempHistory:
             "\x1b[{}C\x1b[1A".format(line_length), end="", flush=True, record=False
         )
 
-    def print(self, *args, sep=" ", end="\n", file=stdout, flush=False, record=True):
-        self.builtin_print(*args, sep=sep, end=end, file=file, flush=flush)
+    def print(self, *args, **kwargs):
+        if "record" in kwargs:
+            record = kwargs["record"]
+            del kwargs["record"]
+        else:
+            record = True
+        if "flush" in kwargs:
+            flush = kwargs["flush"]
+            del kwargs["flush"]
+        else:
+            flush = False
+        if "file" in kwargs:
+            file = kwargs["file"]
+            del kwargs["file"]
+        else:
+            file = stdout
+        if "end" in kwargs:
+            end = kwargs["end"]
+            del kwargs["end"]
+        else:
+            end = "\n"
+        if "sep" in kwargs:
+            sep = kwargs["sep"]
+            del kwargs["sep"]
+        else:
+            sep = " "
+        self.builtin_print(*args, sep=sep, end=end, file=file)
+        if flush:
+            stdout.flush()
         if record:
             text = sep.join([str(arg) for arg in args]) + end
             self._record(text)
