@@ -25,7 +25,8 @@ class BackupTool(App):
 
             system("clear")
         elif data.get("createShortcut") is not None and data["createShortcut"]:
-            from os import remove, rename
+            from os import remove
+            from shutil import move
 
             if platform == "linux":
                 from os import chmod, stat
@@ -65,9 +66,9 @@ class BackupTool(App):
                     )
                 except:
                     pass
-                rename(
+                move(
                     apply_working_directory("./BackupTool.desktop"),
-                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop",
+                    str(Path.home()) + "/.local/share/applications",
                 )
             if platform == "win32":
                 from os import getenv
@@ -95,16 +96,16 @@ class BackupTool(App):
                     except:
                         pass
                 try:
-                    rename(
+                    move(
                         apply_working_directory("./Save Game Backup Tool.lnk"),
                         apply_working_directory(getenv("APPDATA"))
-                        + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
+                        + "/Microsoft/Windows/Start Menu/Programs",
                     )
                 except:
-                    rename(
+                    move(
                         apply_working_directory("./Save Game Backup Tool.lnk"),
                         apply_working_directory(str(Path.home()))
-                        + "/Start Menu/Programs/Save Game Backup Tool.lnk",
+                        + "/Start Menu/Programs",
                     )
         self.backup_threads = []
         self.backup_configs = []
