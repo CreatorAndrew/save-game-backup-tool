@@ -1,2 +1,2 @@
 @echo off
-"BackupTool (Console)" %* --no-gui
+BackupTool %* --no-gui

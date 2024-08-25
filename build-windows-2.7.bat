@@ -1,5 +1,5 @@
 python -m PyInstaller --windowed --icon=BackupTool.ico backup_tool.py -n BackupTool
-copy BackupTool.bat dist\BackupTool
+copy BackupTool-2.7.bat dist\BackupTool\BackupTool.bat
 copy *.json dist\BackupTool
 copy *.ico dist\BackupTool
 copy LICENSE.md dist\BackupTool
