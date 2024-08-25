@@ -1,13 +1,20 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from backup_config import BackupConfig
 from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
-from pathlib import Path
+from io import open
 from temp_history import TempHistory
 from json import load
 from os import listdir
 from sys import argv, platform
 from threading import Thread
 from wx import App, ID_ANY
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
 
 
 class BackupTool(App):
@@ -18,7 +25,8 @@ class BackupTool(App):
 
             system("clear")
         elif data.get("createShortcut") is not None and data["createShortcut"]:
-            from os import remove, rename
+            from os import remove
+            from shutil import move
 
             if platform == "linux":
                 from os import chmod, stat
@@ -58,9 +66,9 @@ class BackupTool(App):
                     )
                 except:
                     pass
-                rename(
+                move(
                     apply_working_directory("./BackupTool.desktop"),
-                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop",
+                    str(Path.home()) + "/.local/share/applications",
                 )
             if platform == "win32":
                 from os import getenv
@@ -80,12 +88,25 @@ class BackupTool(App):
                         + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
-                    pass
-                rename(
-                    apply_working_directory("./Save Game Backup Tool.lnk"),
-                    apply_working_directory(getenv("APPDATA"))
-                    + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk",
-                )
+                    try:
+                        remove(
+                            apply_working_directory(str(Path.home()))
+                            + "/Start Menu/Programs/Save Game Backup Tool.lnk"
+                        )
+                    except:
+                        pass
+                try:
+                    move(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(getenv("APPDATA"))
+                        + "/Microsoft/Windows/Start Menu/Programs",
+                    )
+                except:
+                    move(
+                        apply_working_directory("./Save Game Backup Tool.lnk"),
+                        apply_working_directory(str(Path.home()))
+                        + "/Start Menu/Programs",
+                    )
         self.backup_threads = []
         self.backup_configs = []
         self.configs_used = []
@@ -98,9 +119,7 @@ class BackupTool(App):
             elif arg.lower() == "--skip-choice":
                 skip_choice = True
         if skip_choice:
-            for config in data["configurations"]:
-                if config["name"] == data["default"]:
-                    config_path = config["name"]
+            config_path = data["default"]
         index = 0
         while index < len(argv) and not skip_choice:
             if argv[index].lower() == "--config" and index < len(argv) - 1:

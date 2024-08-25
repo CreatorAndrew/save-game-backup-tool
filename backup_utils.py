@@ -1,5 +1,5 @@
 from os.path import abspath, dirname
-from sys import executable, platform
+from sys import executable, platform, version_info
 from wx import CallAfter
 
 PROMPT = "> "
@@ -14,14 +14,16 @@ def apply_working_directory(path):
     if temp_path == ".":
         temp_path = working_directory
     elif temp_path == "..":
-        temp_path = working_directory[: working_directory.rindex("/")]
+        temp_path = dirname(working_directory)
     elif temp_path.startswith("./"):
         temp_path = temp_path.replace("./", working_directory + "/", 1)
     elif temp_path.startswith("../"):
-        temp_path = temp_path.replace(
-            "../", working_directory[: working_directory.rindex("/")] + "/", 1
-        )
-    return temp_path.replace("/Save Game Backup Tool.app/Contents/Frameworks", "")
+        temp_path = temp_path.replace("../", dirname(working_directory) + "/", 1)
+    return temp_path.replace(
+        "/Save Game Backup Tool.app/Contents/"
+        + ("MacOS" if version_info[0] == 2 else "Frameworks"),
+        "",
+    )
 
 
 def add_to_text_ctrl(text, text_ctrl):

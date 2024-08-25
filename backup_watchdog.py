@@ -1,12 +1,22 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import with_statement
 from backup_utils import add_to_text_ctrl, apply_working_directory, PROMPT
-from pathlib import Path
+from io import open
 from temp_history import TempHistory
-from json import dump, load
+from json import load
 from os import listdir, makedirs, walk
 from os.path import basename, exists, getmtime, join
 from sys import platform
 from time import ctime, strftime, strptime
 from zipfile import ZIP_DEFLATED, ZipFile
+
+try:
+    from pathlib import Path
+    from json import dump
+except:
+    from pathlib2 import Path
+    from json import dumps
 
 
 def get_modified_time(path):
@@ -87,7 +97,12 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
         if text_ctrl is None and use_prompt:
             print(PROMPT, end="", flush=True)
         # Update the JSON file
-        dump(data, open(config_file, "w"), indent=4)
+        try:
+            dump(data, open(config_file, "w"), indent=4)
+        except:
+            open(config_file, "w", encoding="utf-8").write(
+                dumps(data, indent=4, ensure_ascii=False).decode("utf-8")
+            )
 
 
 temp_history = TempHistory()
