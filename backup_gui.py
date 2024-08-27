@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 from __future__ import division
-from backup_config import BackupConfig
+from backup_config import add_config, remove_config, stop_backup_tool
 from backup_utils import apply_working_directory
 from io import open
 from json import load
 from sys import platform
-from threading import Thread
 from wx import (
     ALIGN_CENTER,
     ALL,
@@ -28,14 +27,16 @@ from wx import (
     VERTICAL,
 )
 
+DISABLED_LABEL = "Start"
+ENABLED_LABEL = "Stop"
+
 
 class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         self.backup_threads = []
-        self.backup_configs = []
+        self.backup_configs = {}
         self.configs = data["configurations"]
-        self.configs_used = []
         self.stop_queue = []
         try:
             self.interval = data["interval"]
@@ -56,12 +57,10 @@ class BackupGUI(Frame):
         self.buttons = []
         button_grid_height = 0
         index = 0
-        while index < len(self.configs):
-            self.buttons.append(Button(self.panel, index, "Start"))
+        for config in self.configs:
+            self.buttons.append(Button(self.panel, index, DISABLED_LABEL))
             labels.append(
-                StaticText(
-                    self.panel, index, self.configs[index]["title"].replace("&", "&&")
-                )
+                StaticText(self.panel, index, config["title"].replace("&", "&&"))
             )
             grid.Add(labels[len(labels) - 1], 0, ALIGN_CENTER, 0)
             grid.Add(self.buttons[len(self.buttons) - 1], 0, ALIGN_CENTER, 0)
@@ -87,51 +86,16 @@ class BackupGUI(Frame):
 
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
-        if self.configs[index] in self.configs_used:
-            self.remove_config(index)
+        if self.configs[index].get("in_use") is None:
+            add_config(self, self.configs[index], self.interval, self.text_ctrl)
+            self.buttons[index].SetLabel(ENABLED_LABEL)
         else:
-            self.configs_used.append(self.configs[index])
-            self.backup_configs.append(
-                BackupConfig(
-                    self.configs[index]["title"],
-                    self.configs[index]["name"],
-                    self.interval,
-                )
-            )
-            self.backup_threads.append(
-                Thread(
-                    target=self.backup_configs[len(self.backup_configs) - 1].watchdog,
-                    args=(self.stop_queue, self.text_ctrl, self, index),
-                )
-            )
-            self.backup_threads[len(self.backup_threads) - 1].start()
-            self.buttons[index].SetLabel("Stop")
+            self.remove_config(self.configs[index])
 
-    def remove_config(self, index):
-        self.buttons[index].SetLabel("Start")
-        self.stop_queue.append(
-            self.backup_configs[self.configs_used.index(self.configs[index])].name
-        )
-        while self.backup_configs[
-            self.configs_used.index(self.configs[index])
-        ].continue_running:
-            pass
-        self.stop_queue.remove(
-            self.backup_configs[self.configs_used.index(self.configs[index])].name
-        )
-        self.backup_configs.remove(
-            self.backup_configs[self.configs_used.index(self.configs[index])]
-        )
-        self.configs_used.remove(
-            self.configs_used[self.configs_used.index(self.configs[index])]
-        )
+    def remove_config(self, config):
+        self.buttons[self.configs.index(config)].SetLabel(DISABLED_LABEL)
+        remove_config(config, self.stop_queue, self.backup_configs)
 
     def on_close(self, event):
-        for backup_config in self.backup_configs:
-            self.stop_queue.append(backup_config.name)
-            while backup_config.continue_running:
-                pass
-        self.stop_queue = []
-        self.backup_configs = []
-        self.configs_used = []
+        stop_backup_tool(self.stop_queue, self.backup_configs)
         self.Destroy()

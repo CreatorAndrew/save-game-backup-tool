@@ -1,8 +1,15 @@
+from os import listdir
 from os.path import abspath, dirname
 from sys import executable, platform, version_info
 from wx import CallAfter
 
 PROMPT = "> "
+
+
+def add_to_text_ctrl(text, text_ctrl):
+    if text_ctrl is not None:
+        CallAfter(text_ctrl.AppendText, text + "\n")
+    return text
 
 
 # This method makes it so that this program treats the filesystem as relative to its own path.
@@ -26,7 +33,8 @@ def apply_working_directory(path):
     )
 
 
-def add_to_text_ctrl(text, text_ctrl):
-    if text_ctrl is not None:
-        CallAfter(text_ctrl.AppendText, text + "\n")
-    return text
+def get_files_in_lower_case(path):
+    files = []
+    for file in listdir(path):
+        files.append(file.lower())
+    return files

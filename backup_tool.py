@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
-from backup_config import BackupConfig
+from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
 from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
 from io import open
@@ -20,96 +20,55 @@ except:
 class BackupTool(App):
     def main(self):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
+        for config in data.copy()["configurations"]:
+            if config.get("in_use"):
+                del config["in_use"]
         if platform == "darwin":
             from os import system
 
             system("clear")
         elif data.get("createShortcut") is not None and data["createShortcut"]:
-            from os import remove
-            from shutil import move
-
             if platform == "linux":
                 from os import chmod, stat
 
-                lines = [
-                    "[Desktop Entry]\n",
-                    "Type=Application\n",
-                    "Categories=Game;Utility\n",
-                    "Name=Save Game Backup Tool\n",
-                    "Exec=./BackupTool\n",
-                    "Icon=./BackupTool.ico\n",
-                ]
-                for line in lines:
-                    if line.startswith("Exec="):
-                        lines[lines.index(line)] = line = (
-                            'Exec="'
-                            + apply_working_directory(
-                                line.replace("Exec=", "")
-                            ).replace("\n", '"\n')
-                        )
-                    elif line.startswith("Icon="):
-                        lines[lines.index(line)] = line = (
-                            "Icon=" + apply_working_directory(line.replace("Icon=", ""))
-                        )
-                open(apply_working_directory("./BackupTool.desktop"), "w").writelines(
-                    lines
+                shortcut_path = (
+                    str(Path.home()) + "/.local/share/applications/BackupTool.desktop"
                 )
-                chmod(
-                    apply_working_directory("./BackupTool.desktop"),
-                    stat(apply_working_directory("./BackupTool.desktop")).st_mode
-                    | 0o0111,
+                open(shortcut_path, "w").writelines(
+                    [
+                        "[Desktop Entry]\n",
+                        "Type=Application\n",
+                        "Categories=Game;Utility\n",
+                        "Name=Save Game Backup Tool\n",
+                        'Exec="' + apply_working_directory("./BackupTool") + '"\n',
+                        "Icon=" + apply_working_directory("./BackupTool.ico") + "\n",
+                    ]
                 )
-                try:
-                    remove(
-                        str(Path.home())
-                        + "/.local/share/applications/BackupTool.desktop"
-                    )
-                except:
-                    pass
-                move(
-                    apply_working_directory("./BackupTool.desktop"),
-                    str(Path.home()) + "/.local/share/applications",
-                )
+                chmod(shortcut_path, stat(shortcut_path).st_mode | 0o0111)
             if platform == "win32":
                 from os import getenv
                 from winshell import CreateShortcut
 
-                CreateShortcut(
-                    Path=apply_working_directory("./Save Game Backup Tool.lnk"),
-                    Target=apply_working_directory("./BackupTool.exe"),
-                    Icon=(
-                        apply_working_directory("./BackupTool.exe"),
-                        0,
-                    ),
-                )
+                def create_shortcut(shortcut_path):
+                    CreateShortcut(
+                        Path=shortcut_path,
+                        Target=apply_working_directory("./BackupTool.exe"),
+                        Icon=(apply_working_directory("./BackupTool.exe"), 0),
+                    )
+
                 try:
-                    remove(
-                        apply_working_directory(getenv("APPDATA"))
+                    create_shortcut(
+                        getenv("APPDATA")
                         + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
-                    try:
-                        remove(
-                            apply_working_directory(str(Path.home()))
-                            + "/Start Menu/Programs/Save Game Backup Tool.lnk"
-                        )
-                    except:
-                        pass
-                try:
-                    move(
-                        apply_working_directory("./Save Game Backup Tool.lnk"),
-                        apply_working_directory(getenv("APPDATA"))
-                        + "/Microsoft/Windows/Start Menu/Programs",
+                    create_shortcut(
+                        str(Path.home())
+                        + "/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
-                except:
-                    move(
-                        apply_working_directory("./Save Game Backup Tool.lnk"),
-                        apply_working_directory(str(Path.home()))
-                        + "/Start Menu/Programs",
-                    )
+
         self.backup_threads = []
-        self.backup_configs = []
-        self.configs_used = []
+        self.backup_configs = {}
         config_path = None
         skip_choice = False
         no_gui = False
@@ -145,57 +104,30 @@ class BackupTool(App):
                 while continue_running:
                     print(PROMPT, end="")
                     choice = input()
-                    if choice == "start":
-                        config = self.add_or_remove_config(
-                            config_path, data["configurations"]
-                        )
-                        if config in self.configs_used:
-                            print("That configuration is already in use.")
+                    if choice in ["start"]:
+                        config = add_or_remove_config(data["configurations"])
+                        if config.get("in_use") is None:
+                            add_config(self, config, interval)
                         else:
-                            self.configs_used.append(config)
-                            self.backup_configs.append(
-                                BackupConfig(
-                                    config["title"], config["name"], interval, True
-                                )
-                            )
-                            self.backup_threads.append(
-                                Thread(
-                                    target=self.backup_configs[
-                                        len(self.backup_configs) - 1
-                                    ].watchdog,
-                                    args=(self.stop_queue, None, self, config),
-                                )
-                            )
-                            self.backup_threads[len(self.backup_threads) - 1].start()
-                    elif choice == "stop":
-                        config = self.add_or_remove_config(
-                            config_path, data["configurations"]
-                        )
-                        self.remove_config(config)
-                    elif choice == "end" or choice == "exit" or choice == "quit":
-                        for backup_config in self.backup_configs:
-                            self.stop_queue.append(backup_config.name)
-                            while backup_config.continue_running:
-                                pass
-                        self.stop_queue = []
-                        self.backup_configs = []
-                        self.configs_used = []
+                            print("That configuration is already in use.")
+                    elif choice in ["stop"]:
+                        self.remove_config(add_or_remove_config(data["configurations"]))
+                    elif choice in ["end", "exit", "quit"]:
+                        stop_backup_tool(self.stop_queue, self.backup_configs)
                         continue_running = False
-                    elif choice == "help" or choice == "?":
+                    elif choice in ["help", "?"]:
                         print(
                             'Enter in "start" to initialize a backup configuration.\n'
                             + 'Enter in "stop" to suspend a backup configuration.\n'
                             + 'Enter in "end", "exit", or "quit" to shut down this tool.'
                         )
-                    elif choice != "":
+                    elif str(choice):
                         print("Invalid command")
             else:
-                self.backup_configs.append(
-                    BackupConfig(data["default"], config_path, interval)
-                )
+                self.backup_configs[config_path] = BackupConfig(config_path, interval)
                 self.backup_threads.append(
                     Thread(
-                        target=self.backup_configs[0].watchdog, args=(self.stop_queue,)
+                        target=self.backup_configs[config_path].watchdog, args=(self,)
                     )
                 )
                 self.backup_threads[0].start()
@@ -205,48 +137,32 @@ class BackupTool(App):
             frame.Show()
             app.MainLoop()
 
-    def remove_config(self, config, wait=True):
-        if config in self.configs_used:
-            self.stop_queue.append(
-                self.backup_configs[self.configs_used.index(config)].name
-            )
-            while (
-                wait
-                and self.backup_configs[
-                    self.configs_used.index(config)
-                ].continue_running
-            ):
-                pass
-            self.stop_queue.remove(
-                self.backup_configs[self.configs_used.index(config)].name
-            )
-            self.backup_configs.remove(
-                self.backup_configs[self.configs_used.index(config)]
-            )
-            self.configs_used.remove(config)
-        else:
+    def remove_config(self, config):
+        if config.get("in_use") is None:
             print("That configuration was not in use.")
+        else:
+            remove_config(config, self.stop_queue, self.backup_configs)
 
-    def add_or_remove_config(self, config_path, configs):
-        if config_path is None:
-            print("Select one of the following configurations:")
-            index = 0
-            for config in configs:
-                print("    " + str(index) + ": " + config["title"])
-                index += 1
+
+def add_or_remove_config(configs):
+    print("Select one of the following configurations:")
+    index = 0
+    for config in configs:
+        print("    " + str(index) + ": " + config["title"])
+        index += 1
+    choice = None
+    while choice is None:
+        try:
+            print("Enter in an option number here: ", end="")
+            choice = int(input())
+            if choice >= len(configs) or choice < 0:
+                print("Not a valid option number. Try again.")
+                choice = None
+        except ValueError:
+            print("Invalid input value. Try again with a numeric value.")
             choice = None
-            while choice is None:
-                try:
-                    print("Enter in an option number here: ", end="")
-                    choice = int(input())
-                    if choice >= len(configs) or choice < 0:
-                        print("Not a valid option number. Try again.")
-                        choice = None
-                except ValueError:
-                    print("Invalid input value. Try again with a numeric value.")
-                    choice = None
-            config = configs[choice]
-        return config
+    config = configs[choice]
+    return config
 
 
 temp_history = TempHistory()

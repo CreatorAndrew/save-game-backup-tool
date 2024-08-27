@@ -6,7 +6,7 @@ from io import open
 from temp_history import TempHistory
 from json import load
 from os import listdir, makedirs, walk
-from os.path import basename, exists, getmtime, join
+from os.path import basename, dirname, exists, getmtime, join
 from sys import platform
 from time import ctime, strftime, strptime
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -52,23 +52,21 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
     if save_path is None:
         if first_run:
             if text_ctrl is None and use_prompt:
-                print("")
+                print()
             print(add_to_text_ctrl("No save file found", text_ctrl))
             if text_ctrl is None and use_prompt:
                 print(PROMPT, end="", flush=True)
             return True
         # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
         return
-    save_folder = save_path[: save_path.rindex("/")]
-    if not exists(backup_folder):
-        makedirs(backup_folder)
+    makedirs(backup_folder, exist_ok=True)
     if get_modified_time(save_path) > data["lastBackupTime"]:
         data["lastBackupTime"] = get_modified_time(save_path)
         backup = (
             data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
         )
         if text_ctrl is None and use_prompt:
-            print("")
+            print()
         if exists(join(backup_folder, backup)):
             print(
                 add_to_text_ctrl(
@@ -85,10 +83,10 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
             # Create the backup archive file
             with ZipFile(join(backup_folder, backup), "w") as backup_archive:
                 print(add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
-                for folder, sub_folders, files in walk(save_folder):
+                for directory, subdirectories, files in walk(dirname(save_path)):
                     for file in files:
                         print(add_to_text_ctrl("Added " + file, text_ctrl))
-                        path = join(folder, file)
+                        path = join(directory, file)
                         backup_archive.write(
                             path, basename(path), compress_type=ZIP_DEFLATED
                         )
