@@ -21,7 +21,7 @@ class BackupTool(App):
     def main(self):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         for config in data.copy()["configurations"]:
-            if config.get("in_use"):
+            if config.get("in_use") is not None:
                 del config["in_use"]
         if platform == "darwin":
             from os import system
