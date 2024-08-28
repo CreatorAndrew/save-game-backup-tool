@@ -114,7 +114,7 @@ class BackupTool(App):
                         if config.get("in_use") is None:
                             print("That configuration was not in use.")
                         else:
-                            self.remove_config(self, config)
+                            self.remove_config(config)
                     elif choice in ["end", "exit", "quit"]:
                         stop_backup_tool(self.stop_queue, self.backup_configs)
                         continue_running = False
