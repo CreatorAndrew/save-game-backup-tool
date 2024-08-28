@@ -20,9 +20,6 @@ except:
 class BackupTool(App):
     def main(self):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
-        for config in data["configurations"]:
-            if config.get("in_use") is not None:
-                del config["in_use"]
         if platform == "darwin":
             from os import system
 
@@ -92,6 +89,9 @@ class BackupTool(App):
                 break
             index += 1
         if no_gui:
+            for config in data["configurations"]:
+                if config.get("in_use") is not None:
+                    del config["in_use"]
             try:
                 interval = data["interval"]
             except:
