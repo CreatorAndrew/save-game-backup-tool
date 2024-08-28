@@ -121,7 +121,7 @@ class BackupTool(App):
                             + 'Enter in "stop" to suspend a backup configuration.\n'
                             + 'Enter in "end", "exit", or "quit" to shut down this tool.'
                         )
-                    elif str(choice):
+                    elif choice:
                         print("Invalid command")
             else:
                 self.backup_configs[config_path] = BackupConfig(config_path, interval)
