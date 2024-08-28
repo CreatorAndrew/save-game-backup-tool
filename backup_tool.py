@@ -20,7 +20,7 @@ except:
 class BackupTool(App):
     def main(self):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
-        for config in data.copy()["configurations"]:
+        for config in data["configurations"]:
             if config.get("in_use") is not None:
                 del config["in_use"]
         if platform == "darwin":
