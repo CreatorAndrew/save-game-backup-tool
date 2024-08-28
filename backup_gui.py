@@ -34,6 +34,9 @@ ENABLED_LABEL = "Stop"
 class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
+        for config in data["configurations"]:
+            if config.get("in_use") is not None:
+                del config["in_use"]
         self.backup_threads = []
         self.backup_configs = {}
         self.configs = data["configurations"]
