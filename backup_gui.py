@@ -58,7 +58,6 @@ class BackupGUI(Frame):
         grid = GridSizer(len(self.configs), 2, 0, 0)
         grid_height = 0
         scroll_pane = ScrolledWindow(panel, ID_ANY)
-        scroll_pane.SetScrollbars(1, 1, 100, 100)
         scroll_pane.SetSizer(grid)
         labels = []
         self.buttons = []
@@ -72,9 +71,10 @@ class BackupGUI(Frame):
             grid.Add(self.buttons[len(self.buttons) - 1], 0, ALIGN_CENTER, 0)
             grid_height += self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
             index += 1
-        max_grid_height = 5 * int(grid_height / (len(labels) if labels else 1))
+        button_height = int(grid_height / (len(labels) if labels else 1))
+        scroll_pane.SetScrollbars(1, button_height, 100, 100)
         scroll_pane.SetSize(
-            0, max_grid_height if grid_height > max_grid_height else grid_height
+            0, 5 * button_height if grid_height > 5 * button_height else grid_height
         )
         sizer.Add(scroll_pane, 0, EXPAND | FIXED_MINSIZE, 0)
         self.text_ctrl = TextCtrl(panel, ID_ANY, "", style=TE_MULTILINE | TE_READONLY)
