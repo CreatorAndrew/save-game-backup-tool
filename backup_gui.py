@@ -76,18 +76,15 @@ class BackupGUI(Frame):
         )
         sizer.Add(self.text_ctrl, 2, ALL | EXPAND | FIXED_MINSIZE, 0)
         self.panel.SetSizer(sizer)
-        if button_grid_height >= 0.75 * height:
-            size = (width, int(button_grid_height + height * 2 / 3))
-            try:
-                self.SetSize(self.FromDIP(size))
-            except:
-                self.SetSize(size)
-        else:
-            size = (width, height)
-            try:
-                self.SetSize(self.FromDIP(size))
-            except:
-                self.SetSize(size)
+        size = (
+            (width, height)
+            if button_grid_height < 0.75 * height
+            else (width, int(button_grid_height + height * 2 / 3))
+        )
+        try:
+            self.SetSize(self.FromDIP(size))
+        except:
+            self.SetSize(size)
         self.SetMinSize(self.GetSize())
         self.Layout()
         self.Centre()
