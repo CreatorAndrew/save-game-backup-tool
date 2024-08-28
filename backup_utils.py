@@ -12,7 +12,7 @@ def add_to_text_ctrl(text, text_ctrl):
     return text
 
 
-# This method makes it so that this program treats the filesystem as relative to its own path.
+# This function makes it so that this program treats the filesystem as relative to its own path.
 def apply_working_directory(path):
     temp_path = path.replace("\\", "/")
     working_directory = dirname(
