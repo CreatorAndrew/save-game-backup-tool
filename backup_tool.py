@@ -49,7 +49,7 @@ class BackupTool(App):
                 from os import getenv
                 from winshell import CreateShortcut
 
-                def create_shortcut(shortcut_path):
+                def create_shortcut_at(shortcut_path):
                     CreateShortcut(
                         Path=shortcut_path,
                         Target=apply_working_directory("./BackupTool.exe"),
@@ -57,12 +57,12 @@ class BackupTool(App):
                     )
 
                 try:
-                    create_shortcut(
+                    create_shortcut_at(
                         getenv("APPDATA")
                         + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
                 except:
-                    create_shortcut(
+                    create_shortcut_at(
                         str(Path.home())
                         + "/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
