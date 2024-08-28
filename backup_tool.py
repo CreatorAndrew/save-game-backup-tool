@@ -110,7 +110,11 @@ class BackupTool(App):
                         else:
                             print("That configuration is already in use.")
                     elif choice in ["stop"]:
-                        self.remove_config(add_or_remove_config(data["configurations"]))
+                        config = add_or_remove_config(data["configurations"])
+                        if config.get("in_use") is None:
+                            print("That configuration was not in use.")
+                        else:
+                            self.remove_config(self, config)
                     elif choice in ["end", "exit", "quit"]:
                         stop_backup_tool(self.stop_queue, self.backup_configs)
                         continue_running = False
@@ -137,10 +141,7 @@ class BackupTool(App):
             app.MainLoop()
 
     def remove_config(self, config):
-        if config.get("in_use") is None:
-            print("That configuration was not in use.")
-        else:
-            remove_config(config, self.stop_queue, self.backup_configs)
+        remove_config(config, self.stop_queue, self.backup_configs)
 
 
 def add_or_remove_config(configs):
