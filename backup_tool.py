@@ -66,7 +66,6 @@ class BackupTool(App):
                         str(Path.home())
                         + "/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
-
         self.backup_threads = []
         self.backup_configs = {}
         config_path = None
