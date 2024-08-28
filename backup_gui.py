@@ -20,6 +20,7 @@ from wx import (
     Icon,
     ID_ANY,
     Panel,
+    ScrolledWindow,
     StaticText,
     TE_MULTILINE,
     TE_READONLY,
@@ -29,6 +30,8 @@ from wx import (
 
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
+HEIGHT = 384
+WIDTH = 512
 
 
 class BackupGUI(Frame):
@@ -47,47 +50,43 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
-        width = 512
-        height = 384
         self.SetTitle("Save Game Backup Tool")
         if platform != "darwin":
             self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
-        self.panel = Panel(self, ID_ANY)
+        panel = Panel(self, ID_ANY)
         sizer = BoxSizer(VERTICAL)
         grid = GridSizer(len(self.configs), 2, 0, 0)
-        sizer.Add(grid, 0, EXPAND, 0)
+        grid_height = 0
+        scroll_pane = ScrolledWindow(panel, ID_ANY)
+        scroll_pane.SetScrollbars(1, 1, 100, 100)
+        scroll_pane.SetSizer(grid)
         labels = []
         self.buttons = []
-        button_grid_height = 0
         index = 0
         for config in self.configs:
-            self.buttons.append(Button(self.panel, index, DISABLED_LABEL))
+            self.buttons.append(Button(scroll_pane, index, DISABLED_LABEL))
             labels.append(
-                StaticText(self.panel, index, config["title"].replace("&", "&&"))
+                StaticText(scroll_pane, index, config["title"].replace("&", "&&"))
             )
             grid.Add(labels[len(labels) - 1], 0, ALIGN_CENTER, 0)
             grid.Add(self.buttons[len(self.buttons) - 1], 0, ALIGN_CENTER, 0)
-            button_grid_height += (
-                self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
-            )
+            grid_height += self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
             index += 1
-        self.text_ctrl = TextCtrl(
-            self.panel, ID_ANY, "", style=TE_MULTILINE | TE_READONLY
+        max_grid_height = 5 * int(grid_height / (len(labels) if labels else 1))
+        scroll_pane.SetSize(
+            0, max_grid_height if grid_height > max_grid_height else grid_height
         )
+        sizer.Add(scroll_pane, 0, EXPAND | FIXED_MINSIZE, 0)
+        self.text_ctrl = TextCtrl(panel, ID_ANY, "", style=TE_MULTILINE | TE_READONLY)
         sizer.Add(self.text_ctrl, 2, ALL | EXPAND | FIXED_MINSIZE, 0)
-        self.panel.SetSizer(sizer)
-        size = (
-            (width, height)
-            if button_grid_height < 0.75 * height
-            else (width, int(button_grid_height + height * 2 / 3))
-        )
+        panel.SetSizer(sizer)
         try:
-            self.SetSize(self.FromDIP(size))
+            self.SetSize(self.FromDIP(WIDTH, HEIGHT))
         except:
-            self.SetSize(size)
+            self.SetSize(WIDTH, HEIGHT)
         self.SetMinSize(self.GetSize())
         self.Layout()
-        self.Centre()
+        self.Center()
         for button in self.buttons:
             button.Bind(EVT_BUTTON, self.handle_button)
         self.Bind(EVT_CLOSE, self.on_close)
@@ -95,8 +94,8 @@ class BackupGUI(Frame):
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
         if self.configs[index].get("in_use") is None:
-            add_config(self, self.configs[index], self.interval, self.text_ctrl)
             self.buttons[index].SetLabel(ENABLED_LABEL)
+            add_config(self, self.configs[index], self.interval, self.text_ctrl)
         else:
             self.remove_config(self.configs[index])
 
