@@ -100,10 +100,10 @@ class BackupGUI(Frame):
             self.buttons[index].SetLabel(ENABLED_LABEL)
             add_config(self, self.configs[index], self.interval, self.text_ctrl)
 
-    def remove_config(self, config):
-        self.buttons[self.configs.index(config)].SetLabel(DISABLED_LABEL)
-        remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
-
     def on_close(self, event):
         stop_backup_tool(self.backup_configs, self.configs_used, self.stop_queue)
         self.Destroy()
+
+    def remove_config(self, config):
+        self.buttons[self.configs.index(config)].SetLabel(DISABLED_LABEL)
+        remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
