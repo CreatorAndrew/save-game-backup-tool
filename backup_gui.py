@@ -60,8 +60,8 @@ class BackupGUI(Frame):
         grid_height = 0
         scroll_pane = ScrolledWindow(panel, ID_ANY)
         scroll_pane.SetSizer(grid)
-        labels = []
         self.buttons = []
+        labels = []
         index = 0
         for config in self.configs:
             self.buttons.append(Button(scroll_pane, index, DISABLED_LABEL))
