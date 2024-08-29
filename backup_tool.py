@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 from __future__ import print_function
-from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
-from backup_gui import BackupGUI
-from backup_utils import apply_working_directory, PROMPT
-from io import open
-from temp_history import TempHistory
 from json import load
 from os import listdir
 from sys import argv, platform
 from threading import Thread
+from io import open
 from wx import App, ID_ANY
+from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
+from backup_gui import BackupGUI
+from backup_utils import apply_working_directory, PROMPT
+from temp_history import TempHistory
 
 try:
     from pathlib import Path

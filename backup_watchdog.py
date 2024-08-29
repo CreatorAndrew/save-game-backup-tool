@@ -1,22 +1,23 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import with_statement
-from backup_utils import add_to_text_ctrl, apply_working_directory, PROMPT
 from io import open
-from temp_history import TempHistory
 from json import load
 from os import listdir, makedirs, walk
 from os.path import basename, dirname, exists, getmtime, join
 from sys import platform
 from time import ctime, strftime, strptime
 from zipfile import ZIP_DEFLATED, ZipFile
+from backup_utils import add_to_text_ctrl, apply_working_directory, PROMPT
+from temp_history import TempHistory
 
 try:
     from pathlib import Path
-    from json import dump
 except:
-    from pathlib2 import Path
     from json import dumps
+    from pathlib2 import Path
+else:
+    from json import dump
 
 
 def get_modified_time(path):

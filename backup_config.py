@@ -1,11 +1,11 @@
 from __future__ import absolute_import
-from backup_utils import apply_working_directory, get_files_in_lower_case
-from backup_watchdog import watchdog
 from os import remove
 from os.path import basename
 from time import sleep
 from threading import Thread
 from wx import CallAfter
+from backup_utils import apply_working_directory, get_files_in_lower_case
+from backup_watchdog import watchdog
 
 
 def add_config(callback, config, interval, text_ctrl=None):

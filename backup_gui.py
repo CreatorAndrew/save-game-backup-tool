@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 from __future__ import division
-from backup_config import add_config, remove_config, stop_backup_tool
-from backup_utils import apply_working_directory
 from io import open
 from json import load
 from sys import platform
@@ -27,6 +25,8 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
+from backup_config import add_config, remove_config, stop_backup_tool
+from backup_utils import apply_working_directory
 
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
