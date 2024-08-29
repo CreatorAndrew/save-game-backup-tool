@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from __future__ import print_function
+from io import open
 from json import load
 from os import listdir
 from sys import argv, platform
 from threading import Thread
-from io import open
 from uuid import uuid4
 from wx import App, ID_ANY
 from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
