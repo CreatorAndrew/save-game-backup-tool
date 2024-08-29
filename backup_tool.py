@@ -92,7 +92,7 @@ class BackupTool(App):
             index += 1
         if no_gui:
             for config in data["configurations"]:
-                config["uuid"] = str(uuid4())
+                config["uuid"] = uuid4()
             try:
                 interval = data["interval"]
             except:
