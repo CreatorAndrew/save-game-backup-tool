@@ -42,8 +42,8 @@ class BackupGUI(Frame):
             config["uuid"] = uuid4()
         self.backup_configs = {}
         self.backup_threads = []
-        self.configs_used = []
         self.configs = data["configurations"]
+        self.configs_used = []
         self.stop_queue = []
         try:
             self.interval = data["interval"]
