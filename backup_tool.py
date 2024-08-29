@@ -5,6 +5,7 @@ from os import listdir
 from sys import argv, platform
 from threading import Thread
 from io import open
+from uuid import uuid4
 from wx import App, ID_ANY
 from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
 from backup_gui import BackupGUI
@@ -63,8 +64,9 @@ class BackupTool(App):
                         str(Path.home())
                         + "/Start Menu/Programs/Save Game Backup Tool.lnk"
                     )
-        self.backup_threads = []
         self.backup_configs = {}
+        self.backup_threads = []
+        self.configs_used = []
         config_path = None
         skip_choice = False
         no_gui = False
@@ -90,8 +92,7 @@ class BackupTool(App):
             index += 1
         if no_gui:
             for config in data["configurations"]:
-                if config.get("in_use") is not None:
-                    del config["in_use"]
+                config["uuid"] = str(uuid4())
             try:
                 interval = data["interval"]
             except:
@@ -105,18 +106,20 @@ class BackupTool(App):
                     choice = input()
                     if choice in ["start"]:
                         config = add_or_remove_config(data["configurations"])
-                        if config.get("in_use") is None:
-                            add_config(self, config, interval)
-                        else:
+                        if config["uuid"] in self.configs_used:
                             print("That configuration is already in use.")
+                        else:
+                            add_config(self, config, interval)
                     elif choice in ["stop"]:
                         config = add_or_remove_config(data["configurations"])
-                        if config.get("in_use") is None:
-                            print("That configuration was not in use.")
-                        else:
+                        if config["uuid"] in self.configs_used:
                             self.remove_config(config)
+                        else:
+                            print("That configuration was not in use.")
                     elif choice in ["end", "exit", "quit"]:
-                        stop_backup_tool(self.stop_queue, self.backup_configs)
+                        stop_backup_tool(
+                            self.backup_configs, self.configs_used, self.stop_queue
+                        )
                         continue_running = False
                     elif choice in ["help", "?"]:
                         print(
@@ -141,7 +144,7 @@ class BackupTool(App):
             app.MainLoop()
 
     def remove_config(self, config):
-        remove_config(config, self.stop_queue, self.backup_configs)
+        remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
 
 
 def add_or_remove_config(configs):

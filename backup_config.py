@@ -9,42 +9,41 @@ from backup_watchdog import watchdog
 
 
 def add_config(callback, config, interval, text_ctrl=None):
-    config["in_use"] = True
-    callback.backup_configs[config["name"]] = BackupConfig(
-        config["name"], interval, True
+    callback.configs_used.append(config["uuid"])
+    callback.backup_configs[config["uuid"]] = BackupConfig(
+        config["name"], config["uuid"], interval, True
     )
     callback.backup_threads.append(
         Thread(
-            target=callback.backup_configs[config["name"]].watchdog,
+            target=callback.backup_configs[config["uuid"]].watchdog,
             args=(callback, config, text_ctrl),
         )
     )
     callback.backup_threads[len(callback.backup_threads) - 1].start()
 
 
-def remove_config(config, stop_queue, backup_configs):
-    stop_queue.append(config["name"])
-    while backup_configs[config["name"]].continue_running:
+def remove_config(config, backup_configs, configs_used, stop_queue):
+    stop_queue.append(config["uuid"])
+    while backup_configs[config["uuid"]].continue_running:
         pass
-    stop_queue.remove(config["name"])
-    del backup_configs[config["name"]]
-    del config["in_use"]
+    configs_used.remove(config["uuid"])
+    stop_queue.remove(config["uuid"])
+    del backup_configs[config["uuid"]]
 
 
-def stop_backup_tool(stop_queue, backup_configs):
-    for backup_config in backup_configs.items():
-        stop_queue.append(backup_config[0])
-        while backup_config[1].continue_running:
-            pass
-    stop_queue = []
-    backup_configs = {}
+def stop_backup_tool(backup_configs, configs_used, stop_queue):
+    for backup_config in backup_configs.copy().items():
+        remove_config(
+            {"uuid": backup_config[0]}, backup_configs, configs_used, stop_queue
+        )
 
 
 class BackupConfig:
-    def __init__(self, path, interval, use_prompt=False):
+    def __init__(self, path, uuid, interval, use_prompt=False):
         self.config_path = path
+        self.continue_running = True
+        self.first_run = True
         self.interval = interval
-        self.use_prompt = use_prompt
         self.stop_backup_file = apply_working_directory(
             "./.stop"
             + path[
@@ -55,12 +54,12 @@ class BackupConfig:
                 )
             ]
         )
-        self.continue_running = True
-        self.first_run = True
+        self.use_prompt = use_prompt
+        self.uuid = uuid
 
     def watchdog(self, callback, config=None, text_ctrl=None):
         if self.config_path is not None:
-            while self.config_path not in callback.stop_queue and self.continue_running:
+            while self.uuid not in callback.stop_queue and self.continue_running:
                 sleep(self.interval)
                 if watchdog(
                     self.config_path, text_ctrl, self.use_prompt, self.first_run

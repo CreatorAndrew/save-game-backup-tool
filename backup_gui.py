@@ -3,6 +3,7 @@ from __future__ import division
 from io import open
 from json import load
 from sys import platform
+from uuid import uuid4
 from wx import (
     ALIGN_CENTER,
     ALL,
@@ -38,10 +39,10 @@ class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         for config in data["configurations"]:
-            if config.get("in_use") is not None:
-                del config["in_use"]
-        self.backup_threads = []
+            config["uuid"] = str(uuid4())
         self.backup_configs = {}
+        self.backup_threads = []
+        self.configs_used = []
         self.configs = data["configurations"]
         self.stop_queue = []
         try:
@@ -93,16 +94,16 @@ class BackupGUI(Frame):
 
     def handle_button(self, event):
         index = event.GetEventObject().GetId()
-        if self.configs[index].get("in_use") is None:
+        if self.configs[index]["uuid"] in self.configs_used:
+            self.remove_config(self.configs[index])
+        else:
             self.buttons[index].SetLabel(ENABLED_LABEL)
             add_config(self, self.configs[index], self.interval, self.text_ctrl)
-        else:
-            self.remove_config(self.configs[index])
 
     def remove_config(self, config):
         self.buttons[self.configs.index(config)].SetLabel(DISABLED_LABEL)
-        remove_config(config, self.stop_queue, self.backup_configs)
+        remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
 
     def on_close(self, event):
-        stop_backup_tool(self.stop_queue, self.backup_configs)
+        stop_backup_tool(self.backup_configs, self.configs_used, self.stop_queue)
         self.Destroy()
