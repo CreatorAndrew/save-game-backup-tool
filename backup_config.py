@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from os import remove
+from os import listdir, remove
 from os.path import basename
 from time import sleep
 from threading import Thread
@@ -69,10 +69,12 @@ class BackupConfig:
                     while basename(
                         self.stop_backup_file
                     ).lower() in get_files_in_lower_case(apply_working_directory(".")):
-                        try:
-                            remove(self.stop_backup_file)
-                        except:
-                            pass
+                        for file in listdir(apply_working_directory(".")):
+                            if file.lower() == basename(self.stop_backup_file).lower():
+                                try:
+                                    remove(apply_working_directory("./" + file))
+                                except:
+                                    pass
                     self.continue_running = False
                     if text_ctrl is None:
                         if config is not None:
