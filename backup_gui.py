@@ -69,8 +69,8 @@ class BackupGUI(Frame):
                 StaticText(scroll_pane, index, config["title"].replace("&", "&&"))
             )
             grid.Add(labels[len(labels) - 1], 0, ALIGN_CENTER, 0)
-            grid.Add(self.buttons[len(self.buttons) - 1], 0, ALIGN_CENTER, 0)
-            grid_height += self.buttons[len(self.buttons) - 1].GetSize().GetHeight()
+            grid.Add(self.buttons[len(labels) - 1], 0, ALIGN_CENTER, 0)
+            grid_height += self.buttons[0].GetSize().GetHeight()
             index += 1
         button_height = int(grid_height / (len(labels) if labels else 1))
         scroll_pane.SetScrollbars(1, button_height, 100, 100)
