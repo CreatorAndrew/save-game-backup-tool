@@ -1,3 +1,5 @@
+#!/bin/bash
+cd "${0%/*}"
 python -m PyInstaller --onefile backup_tool.py -n BackupTool
 cp *.json dist
 cp *.ico dist
