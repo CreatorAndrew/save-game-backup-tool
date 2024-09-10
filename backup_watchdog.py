@@ -4,7 +4,7 @@ from __future__ import with_statement
 from io import open
 from json import load
 from os import listdir, makedirs, walk
-from os.path import basename, dirname, exists, getmtime, join
+from os.path import basename, dirname, getmtime, isfile, join
 from sys import platform
 from time import ctime, strftime, strptime
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -47,7 +47,7 @@ def watchdog(config_path, text_ctrl, use_prompt, first_run):
             )
             + searchable_save_path["path"]
         )
-        if exists(temp_save_path):
+        if isfile(temp_save_path):
             save_path = temp_save_path
             break
     if save_path is None:
@@ -68,7 +68,7 @@ def watchdog(config_path, text_ctrl, use_prompt, first_run):
         )
         if text_ctrl is None and use_prompt:
             print()
-        if exists(join(backup_folder, backup)):
+        if isfile(join(backup_folder, backup)):
             print(
                 add_to_text_ctrl(
                     backup
@@ -91,7 +91,7 @@ def watchdog(config_path, text_ctrl, use_prompt, first_run):
                         backup_archive.write(
                             path, basename(path), compress_type=ZIP_DEFLATED
                         )
-                if exists(join(backup_folder, backup)):
+                if isfile(join(backup_folder, backup)):
                     print(add_to_text_ctrl("Backup successful", text_ctrl))
         if text_ctrl is None and use_prompt:
             print(PROMPT, end="", flush=True)
