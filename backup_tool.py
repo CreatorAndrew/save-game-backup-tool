@@ -76,19 +76,18 @@ class BackupTool(App):
                 skip_choice = True
         if skip_choice:
             config_file = data["default"]
-        index = 0
-        while index < len(argv) and not skip_choice:
-            if argv[index].lower() == "--config" and index < len(argv) - 1:
-                for file in listdir(apply_working_directory(".")):
-                    if (
-                        file.lower().endswith(".json")
-                        and file.lower()
-                        == argv[index + 1].lower().replace(".json", "") + ".json"
-                    ):
-                        config_file = file
-                        break
-                break
-            index += 1
+        else:
+            for index in range(len(argv)):
+                if argv[index].lower() == "--config" and index < len(argv) - 1:
+                    for file in listdir(apply_working_directory(".")):
+                        if (
+                            file.lower().endswith(".json")
+                            and file.lower()
+                            == argv[index + 1].lower().replace(".json", "") + ".json"
+                        ):
+                            config_file = file
+                            break
+                    break
         if no_gui:
             for config in data["configurations"]:
                 config["uuid"] = uuid4()
@@ -144,10 +143,8 @@ class BackupTool(App):
 
 def add_or_remove_config(configs):
     print("Select one of the following configurations:")
-    index = 0
-    for config in configs:
+    for index, config in enumerate(configs):
         print("    " + str(index) + ": " + config["title"])
-        index += 1
     choice = None
     while choice is None:
         try:

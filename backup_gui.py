@@ -60,18 +60,16 @@ class BackupGUI(Frame):
         grid_height = 0
         scroll_pane = ScrolledWindow(panel, ID_ANY)
         scroll_pane.SetSizer(grid)
-        self.buttons = []
+        self.buttons = {}
         labels = []
-        index = 0
-        for config in self.configs:
-            self.buttons.append(Button(scroll_pane, index, DISABLED_LABEL))
+        for index, config in enumerate(self.configs):
+            self.buttons[config["uuid"]] = Button(scroll_pane, index, DISABLED_LABEL)
             labels.append(
                 StaticText(scroll_pane, index, config["title"].replace("&", "&&"))
             )
             grid.Add(labels[len(labels) - 1], 0, ALIGN_CENTER, 0)
-            grid.Add(self.buttons[len(labels) - 1], 0, ALIGN_CENTER, 0)
-            grid_height += self.buttons[0].GetSize().GetHeight()
-            index += 1
+            grid.Add(self.buttons[config["uuid"]], 0, ALIGN_CENTER, 0)
+            grid_height += self.buttons[config["uuid"]].GetSize().GetHeight()
         button_height = int(grid_height / (len(labels) if labels else 1))
         scroll_pane.SetScrollbars(1, button_height, 100, 100)
         scroll_pane.SetSize(
@@ -88,25 +86,22 @@ class BackupGUI(Frame):
         self.SetMinSize(self.GetSize())
         self.Layout()
         self.Center()
-        for button in self.buttons:
+        for button in self.buttons.values():
             button.Bind(EVT_BUTTON, self.handle_button)
         self.Bind(EVT_CLOSE, self.on_close)
 
     def handle_button(self, event):
-        index = event.GetEventObject().GetId()
-        if self.configs[index]["uuid"] in self.configs_used:
-            self.remove_config(self.configs[index])
+        config = self.configs[event.GetEventObject().GetId()]
+        if config["uuid"] in self.configs_used:
+            self.remove_config(config)
         else:
-            self.buttons[index].SetLabel(ENABLED_LABEL)
-            add_config(self, self.configs[index], self.interval, self.text_ctrl)
+            self.buttons[config["uuid"]].SetLabel(ENABLED_LABEL)
+            add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, event):
         remove_all_configs(self, self.text_ctrl)
         self.Destroy()
 
     def remove_config(self, config):
-        uuids = []
-        for temp_config in self.configs:
-            uuids.append(temp_config["uuid"])
-        self.buttons[uuids.index(config["uuid"])].SetLabel(DISABLED_LABEL)
+        self.buttons[config["uuid"]].SetLabel(DISABLED_LABEL)
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
