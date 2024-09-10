@@ -105,8 +105,9 @@ class BackupGUI(Frame):
         self.Destroy()
 
     def remove_config(self, config):
-        temp_configs = []
+        config_uuid = config["uuid"]
+        config_uuids = []
         for temp_config in self.configs:
-            temp_configs.append({"uuid": temp_config["uuid"]})
-        self.buttons[temp_configs.index(config)].SetLabel(DISABLED_LABEL)
+            config_uuids.append(temp_config["uuid"])
+        self.buttons[config_uuids.index(config_uuid)].SetLabel(DISABLED_LABEL)
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
