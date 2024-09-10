@@ -31,7 +31,7 @@ def remove_config(config, backup_configs, configs_used, stop_queue):
     del backup_configs[config["uuid"]]
 
 
-def stop_backup_tool(backup_configs, configs_used, stop_queue):
+def remove_all_configs(backup_configs, configs_used, stop_queue):
     for backup_config in backup_configs.copy().items():
         remove_config(
             {"uuid": backup_config[0]}, backup_configs, configs_used, stop_queue

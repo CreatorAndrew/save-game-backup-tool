@@ -26,7 +26,7 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
-from backup_config import add_config, remove_config, stop_backup_tool
+from backup_config import add_config, remove_config, remove_all_configs
 from backup_utils import apply_working_directory
 
 DISABLED_LABEL = "Start"
@@ -101,7 +101,7 @@ class BackupGUI(Frame):
             add_config(self, self.configs[index], self.interval, self.text_ctrl)
 
     def on_close(self, event):
-        stop_backup_tool(self.backup_configs, self.configs_used, self.stop_queue)
+        remove_all_configs(self.backup_configs, self.configs_used, self.stop_queue)
         self.Destroy()
 
     def remove_config(self, config):

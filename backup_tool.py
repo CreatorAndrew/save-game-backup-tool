@@ -7,7 +7,7 @@ from sys import argv, platform
 from threading import Thread
 from uuid import uuid4
 from wx import App, ID_ANY
-from backup_config import add_config, BackupConfig, remove_config, stop_backup_tool
+from backup_config import add_config, BackupConfig, remove_config, remove_all_configs
 from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
@@ -116,7 +116,7 @@ class BackupTool(App):
                         else:
                             print("That configuration was not in use.")
                     elif choice in ["end", "exit", "quit"]:
-                        stop_backup_tool(
+                        remove_all_configs(
                             self.backup_configs, self.configs_used, self.stop_queue
                         )
                         continue_running = False
