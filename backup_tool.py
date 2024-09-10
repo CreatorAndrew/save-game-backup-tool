@@ -163,8 +163,7 @@ def add_or_remove_config(configs):
         except ValueError:
             print("Invalid input value. Try again with a numeric value.")
             choice = None
-    config = configs[choice]
-    return config
+    return configs[choice]
 
 
 temp_history = TempHistory()
