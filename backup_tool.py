@@ -7,7 +7,7 @@ from sys import argv, platform
 from threading import Thread
 from uuid import uuid4
 from wx import App, ID_ANY
-from backup_config import add_config, BackupConfig, remove_config, remove_all_configs
+from backup_config import add_config, BackupConfig, remove_all_configs, remove_config
 from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory

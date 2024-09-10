@@ -26,7 +26,7 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
-from backup_config import add_config, remove_config, remove_all_configs
+from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
 DISABLED_LABEL = "Start"

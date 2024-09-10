@@ -22,6 +22,13 @@ def add_config(callback, config, interval, text_ctrl=None):
     callback.backup_threads[len(callback.backup_threads) - 1].start()
 
 
+def remove_all_configs(backup_configs, configs_used, stop_queue):
+    for backup_config in backup_configs.copy().items():
+        remove_config(
+            {"uuid": backup_config[0]}, backup_configs, configs_used, stop_queue
+        )
+
+
 def remove_config(config, backup_configs, configs_used, stop_queue):
     stop_queue.append(config["uuid"])
     while backup_configs[config["uuid"]].continue_running:
@@ -29,13 +36,6 @@ def remove_config(config, backup_configs, configs_used, stop_queue):
     configs_used.remove(config["uuid"])
     stop_queue.remove(config["uuid"])
     del backup_configs[config["uuid"]]
-
-
-def remove_all_configs(backup_configs, configs_used, stop_queue):
-    for backup_config in backup_configs.copy().items():
-        remove_config(
-            {"uuid": backup_config[0]}, backup_configs, configs_used, stop_queue
-        )
 
 
 class BackupConfig:
