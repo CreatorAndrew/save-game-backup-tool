@@ -101,7 +101,7 @@ class BackupTool(App):
             if config_file is None:
                 print('Enter in "help" or "?" for assistance.')
                 while continue_running:
-                    print(PROMPT, end="")
+                    print(PROMPT, end=" ")
                     choice = input()
                     if choice in ["start"]:
                         config = add_or_remove_config(data["configurations"])
@@ -151,7 +151,7 @@ def add_or_remove_config(configs):
     choice = None
     while choice is None:
         try:
-            print("Enter in an option number here: ", end="")
+            print("Enter in an option number here:", end=" ")
             choice = int(input())
             if choice >= len(configs) or choice < 0:
                 print("Not a valid option number. Try again.")

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 from os import listdir, remove
-from os.path import basename
 from time import sleep
 from threading import Thread
 from wx import CallAfter
@@ -45,8 +44,8 @@ class BackupConfig:
         self.continue_running = True
         self.first_run = True
         self.interval = interval
-        self.stop_backup_file = apply_working_directory(
-            "./.stop"
+        self.stop_backup_file = (
+            ".stop"
             + file[
                 : (
                     file.lower().rindex(".json")
@@ -54,7 +53,7 @@ class BackupConfig:
                     else None
                 )
             ]
-        )
+        ).lower()
         self.use_prompt = use_prompt
         self.uuid = uuid
 
@@ -64,14 +63,14 @@ class BackupConfig:
                 sleep(self.interval)
                 if watchdog(
                     self.config_file, text_ctrl, self.use_prompt, self.first_run
-                ) or basename(self.stop_backup_file).lower() in get_files_in_lower_case(
+                ) or self.stop_backup_file in get_files_in_lower_case(
                     apply_working_directory(".")
                 ):
-                    while basename(
-                        self.stop_backup_file
-                    ).lower() in get_files_in_lower_case(apply_working_directory(".")):
+                    while self.stop_backup_file in get_files_in_lower_case(
+                        apply_working_directory(".")
+                    ):
                         for file in listdir(apply_working_directory(".")):
-                            if file.lower() == basename(self.stop_backup_file).lower():
+                            if file.lower() == self.stop_backup_file:
                                 try:
                                     remove(apply_working_directory("./" + file))
                                 except:

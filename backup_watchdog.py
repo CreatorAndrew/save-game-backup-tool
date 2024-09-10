@@ -56,23 +56,23 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
                 print()
             print(add_to_text_ctrl("No save file found", text_ctrl))
             if text_ctrl is None and use_prompt:
-                print(PROMPT, end="", flush=True)
+                print(PROMPT, end=" ", flush=True)
             return True
         # Sometimes on Linux, when Steam launches a Windows game, the Proton prefix path becomes briefly inaccessible.
         return
     makedirs(backup_folder, exist_ok=True)
     if get_modified_time(save_path) > data["lastBackupTime"]:
         data["lastBackupTime"] = get_modified_time(save_path)
-        backup = (
-            data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
+        backup_path = join(
+            backup_folder,
+            data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip",
         )
-        backup_path = join(backup_folder, backup)
         if text_ctrl is None and use_prompt:
             print()
         if isfile(backup_path):
             print(
                 add_to_text_ctrl(
-                    backup
+                    basename(backup_path)
                     + " already exists in "
                     + dirname(backup_path).replace(
                         "/", "\\" if platform == "win32" else "/"
@@ -84,7 +84,11 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
         else:
             # Create the backup archive file
             with ZipFile(backup_path, "w") as backup_archive:
-                print(add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
+                print(
+                    add_to_text_ctrl(
+                        "Creating backup archive: " + basename(backup_path), text_ctrl
+                    )
+                )
                 for directory, subdirectories, files in walk(dirname(save_path)):
                     for file in files:
                         print(add_to_text_ctrl("Added " + file, text_ctrl))
@@ -95,7 +99,7 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
             if isfile(backup_path):
                 print(add_to_text_ctrl("Backup successful", text_ctrl))
         if text_ctrl is None and use_prompt:
-            print(PROMPT, end="", flush=True)
+            print(PROMPT, end=" ", flush=True)
         # Update the JSON file
         try:
             dump(data, open(config_file, "w"), indent=4)
@@ -105,5 +109,4 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
             )
 
 
-temp_history = TempHistory()
-print = temp_history.print
+print = TempHistory().print

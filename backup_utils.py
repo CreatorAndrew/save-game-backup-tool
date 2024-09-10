@@ -3,7 +3,7 @@ from os.path import abspath, dirname
 from sys import executable, platform, version_info
 from wx import CallAfter
 
-PROMPT = "> "
+PROMPT = ">"
 
 
 def add_to_text_ctrl(text, text_ctrl):
