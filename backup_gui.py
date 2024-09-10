@@ -12,12 +12,14 @@ from wx import (
     DEFAULT_FRAME_STYLE,
     EVT_BUTTON,
     EVT_CLOSE,
+    EVT_MENU,
     EXPAND,
     FIXED_MINSIZE,
     Frame,
     GridSizer,
     Icon,
     ID_ANY,
+    Menu,
     Panel,
     ScrolledWindow,
     StaticText,
@@ -26,6 +28,7 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
+from wx.adv import TaskBarIcon
 from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
@@ -51,6 +54,7 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
+        self.tray_icon = BackupTrayIcon(self)
         self.SetTitle("Save Game Backup Tool")
         if platform != "darwin":
             self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
@@ -99,9 +103,50 @@ class BackupGUI(Frame):
             add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, event):
+        self.Hide()
+
+    def exit(self):
         remove_all_configs(self, self.text_ctrl)
+        self.tray_icon.Destroy()
         self.Destroy()
 
     def remove_config(self, config):
         self.buttons[config["uuid"]].SetLabel(DISABLED_LABEL)
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
+
+
+class BackupTrayIcon(TaskBarIcon):
+    def __init__(self, frame):
+        TaskBarIcon.__init__(self)
+        self.frame = frame
+        self.SetIcon(
+            Icon(
+                apply_working_directory(
+                    (
+                        "./Save Game Backup Tool.app/Contents/Resources/"
+                        if platform == "darwin"
+                        else "./"
+                    )
+                    + "BackupTool.ico"
+                )
+            ),
+            "Save Game Backup Tool",
+        )
+        self.Bind(EVT_MENU, self.on_tray_change_shown, id=1)
+        self.Bind(EVT_MENU, self.on_tray_close, id=2)
+
+    def CreatePopupMenu(self):
+        menu = Menu()
+        menu.Append(1, "Hide" if self.frame.IsShown() else "Show")
+        menu.Append(2, "Exit")
+
+        return menu
+
+    def on_tray_change_shown(self, event):
+        if self.frame.IsShown():
+            self.frame.Hide()
+        else:
+            self.frame.Show()
+
+    def on_tray_close(self, event):
+        self.frame.exit()

@@ -12,6 +12,13 @@ from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
 
+if platform == "darwin":
+    from AppKit import NSBundle
+
+    bundle = NSBundle.mainBundle()
+    info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+    info["LSUIElement"] = "1"
+
 
 class BackupTool(App):
     def main(self):
@@ -134,7 +141,12 @@ class BackupTool(App):
                 )
                 self.backup_threads[0].start()
         else:
-            BackupGUI(None, ID_ANY, "").Show()
+            frame = BackupGUI(None, ID_ANY, "wx.adv - TaskBarIcon")
+            frame.Show(
+                True
+                if data.get("startMinimized") is None
+                else not data["startMinimized"]
+            )
             self.MainLoop()
 
     def remove_config(self, config):

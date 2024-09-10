@@ -11,5 +11,6 @@
     ],
     "default": "Bully",
     "interval": 0.1,
-    "createShortcut": true
+    "createShortcut": true,
+    "startMinimized": false
 }

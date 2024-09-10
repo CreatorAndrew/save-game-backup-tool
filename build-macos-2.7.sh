@@ -4,6 +4,7 @@ codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/Ma
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/Python
 codesign --force --timestamp --sign $certificate dist/BackupTool.app/Contents/MacOS/BackupTool
 cp *.command dist
+cp *.ico dist/BackupTool.app/Contents/Resources
 cp *.json dist
 cp LICENSE.md dist
 cp -r Test dist/Test

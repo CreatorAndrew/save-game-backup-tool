@@ -1,5 +1,6 @@
 python -m PyInstaller --noconsole --icon=BackupTool.png backup_tool.py -n BackupTool
 cp *.command dist
+cp *.ico dist/BackupTool.app/Contents/Resources
 cp *.json dist
 cp LICENSE.md dist
 cp -r Test dist/Test
