@@ -24,15 +24,15 @@ def get_modified_time(path):
     return int(strftime("%Y%m%d%H%M%S", strptime(ctime(getmtime(path)))))
 
 
-def watchdog(config_path, text_ctrl, use_prompt, first_run):
+def watchdog(config_file, text_ctrl, use_prompt, first_run):
     for file in listdir(apply_working_directory(".")):
         if (
             file.lower().endswith(".json")
-            and file.lower() == config_path.lower().replace(".json", "") + ".json"
+            and file.lower() == config_file.lower().replace(".json", "") + ".json"
         ):
-            config_path = apply_working_directory("./" + file)
+            config_file = apply_working_directory("./" + file)
             break
-    data = load(open(config_path, "r"))
+    data = load(open(config_file, "r"))
     backup_folder = apply_working_directory(
         (str(Path.home()) + "/" if data["backupPath"]["startsWithUserPath"] else "")
         + data["backupPath"]["path"]
@@ -97,9 +97,9 @@ def watchdog(config_path, text_ctrl, use_prompt, first_run):
             print(PROMPT, end="", flush=True)
         # Update the JSON file
         try:
-            dump(data, open(config_path, "w"), indent=4)
+            dump(data, open(config_file, "w"), indent=4)
         except:
-            open(config_path, "w", encoding="utf-8").write(
+            open(config_file, "w", encoding="utf-8").write(
                 dumps(data, indent=4, ensure_ascii=False).decode("utf-8")
             )
 
