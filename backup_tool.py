@@ -158,7 +158,6 @@ def add_or_remove_config(configs):
                 choice = None
         except ValueError:
             print("Invalid input value. Try again with a numeric value.")
-            choice = None
     return configs[choice]
 
 
