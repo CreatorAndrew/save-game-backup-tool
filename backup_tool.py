@@ -138,8 +138,7 @@ class BackupTool(App):
                 self.backup_threads[0].start()
         else:
             app = App()
-            frame = BackupGUI(None, ID_ANY, "")
-            frame.Show()
+            BackupGUI(None, ID_ANY, "").Show()
             app.MainLoop()
 
     def remove_config(self, config):
