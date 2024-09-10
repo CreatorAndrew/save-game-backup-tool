@@ -66,23 +66,24 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
         backup = (
             data["backupFileNamePrefix"] + "+" + str(data["lastBackupTime"]) + ".zip"
         )
+        backup_path = join(backup_folder, backup)
         if text_ctrl is None and use_prompt:
             print()
-        if isfile(join(backup_folder, backup)):
+        if isfile(backup_path):
             print(
                 add_to_text_ctrl(
                     backup
                     + " already exists in "
-                    + backup_folder[
-                        : -1 if backup_folder.endswith("/") else None
-                    ].replace("/", "\\" if platform == "win32" else "/")
+                    + dirname(backup_path).replace(
+                        "/", "\\" if platform == "win32" else "/"
+                    )
                     + ".\nBackup cancelled",
                     text_ctrl,
                 )
             )
         else:
             # Create the backup archive file
-            with ZipFile(join(backup_folder, backup), "w") as backup_archive:
+            with ZipFile(backup_path, "w") as backup_archive:
                 print(add_to_text_ctrl("Creating backup archive: " + backup, text_ctrl))
                 for directory, subdirectories, files in walk(dirname(save_path)):
                     for file in files:
@@ -91,8 +92,8 @@ def watchdog(config_file, text_ctrl, use_prompt, first_run):
                         backup_archive.write(
                             path, basename(path), compress_type=ZIP_DEFLATED
                         )
-                if isfile(join(backup_folder, backup)):
-                    print(add_to_text_ctrl("Backup successful", text_ctrl))
+            if isfile(backup_path):
+                print(add_to_text_ctrl("Backup successful", text_ctrl))
         if text_ctrl is None and use_prompt:
             print(PROMPT, end="", flush=True)
         # Update the JSON file
