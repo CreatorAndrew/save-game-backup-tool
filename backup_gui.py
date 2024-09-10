@@ -101,9 +101,12 @@ class BackupGUI(Frame):
             add_config(self, self.configs[index], self.interval, self.text_ctrl)
 
     def on_close(self, event):
-        remove_all_configs(self.backup_configs, self.configs_used, self.stop_queue)
+        remove_all_configs(self, self.text_ctrl)
         self.Destroy()
 
     def remove_config(self, config):
-        self.buttons[self.configs.index(config)].SetLabel(DISABLED_LABEL)
+        temp_configs = []
+        for temp_config in self.configs:
+            temp_configs.append({"uuid": temp_config["uuid"]})
+        self.buttons[temp_configs.index(config)].SetLabel(DISABLED_LABEL)
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
