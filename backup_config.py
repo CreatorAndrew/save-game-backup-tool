@@ -23,11 +23,11 @@ def add_config(callback, config, interval, text_ctrl=None):
 
 
 def remove_all_configs(callback, text_ctrl=None):
-    for backup_config in callback.backup_configs.copy().items():
+    for uuid in callback.backup_configs.copy().keys():
         if text_ctrl is None:
-            callback.remove_config({"uuid": backup_config[0]})
+            callback.remove_config({"uuid": uuid})
         else:
-            CallAfter(callback.remove_config, {"uuid": backup_config[0]})
+            CallAfter(callback.remove_config, {"uuid": uuid})
 
 
 def remove_config(config, backup_configs, configs_used, stop_queue):
