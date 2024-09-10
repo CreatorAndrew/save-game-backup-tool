@@ -12,11 +12,6 @@ from backup_gui import BackupGUI
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
 
-try:
-    from pathlib import Path
-except:
-    from pathlib2 import Path
-
 
 class BackupTool(App):
     def main(self):
@@ -26,6 +21,10 @@ class BackupTool(App):
 
             system("clear")
         elif data.get("createShortcut") is not None and data["createShortcut"]:
+            try:
+                from pathlib import Path
+            except:
+                from pathlib2 import Path
             if platform == "linux":
                 from os import chmod, stat
 
