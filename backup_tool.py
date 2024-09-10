@@ -169,5 +169,4 @@ def add_or_remove_config(configs):
 temp_history = TempHistory()
 print = temp_history.print
 input = temp_history.input
-backup_tool = BackupTool()
-backup_tool.main()
+BackupTool().main()
