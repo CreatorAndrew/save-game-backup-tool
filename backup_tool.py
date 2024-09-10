@@ -66,7 +66,7 @@ class BackupTool(App):
         self.backup_configs = {}
         self.backup_threads = []
         self.configs_used = []
-        config_path = None
+        config_file = None
         skip_choice = False
         no_gui = False
         for arg in argv:
@@ -75,7 +75,7 @@ class BackupTool(App):
             elif arg.lower() == "--skip-choice":
                 skip_choice = True
         if skip_choice:
-            config_path = data["default"]
+            config_file = data["default"]
         index = 0
         while index < len(argv) and not skip_choice:
             if argv[index].lower() == "--config" and index < len(argv) - 1:
@@ -85,7 +85,7 @@ class BackupTool(App):
                         and file.lower()
                         == argv[index + 1].lower().replace(".json", "") + ".json"
                     ):
-                        config_path = file
+                        config_file = file
                         break
                 break
             index += 1
@@ -98,7 +98,7 @@ class BackupTool(App):
                 interval = 0
             self.stop_queue = []
             continue_running = True
-            if config_path is None:
+            if config_file is None:
                 print('Enter in "help" or "?" for assistance.')
                 while continue_running:
                     print(PROMPT, end="")
@@ -127,10 +127,10 @@ class BackupTool(App):
                     elif choice:
                         print("Invalid command")
             else:
-                self.backup_configs[config_path] = BackupConfig(config_path, interval)
+                self.backup_configs[config_file] = BackupConfig(config_file, interval)
                 self.backup_threads.append(
                     Thread(
-                        target=self.backup_configs[config_path].watchdog, args=(self,)
+                        target=self.backup_configs[config_file].watchdog, args=(self,)
                     )
                 )
                 self.backup_threads[0].start()

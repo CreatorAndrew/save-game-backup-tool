@@ -40,17 +40,17 @@ def remove_config(config, backup_configs, configs_used, stop_queue):
 
 
 class BackupConfig:
-    def __init__(self, path, uuid, interval, use_prompt=False):
-        self.config_path = path
+    def __init__(self, file, uuid, interval, use_prompt=False):
+        self.config_file = file
         self.continue_running = True
         self.first_run = True
         self.interval = interval
         self.stop_backup_file = apply_working_directory(
             "./.stop"
-            + path[
+            + file[
                 : (
-                    path.lower().rindex(".json")
-                    if path.lower().endswith(".json")
+                    file.lower().rindex(".json")
+                    if file.lower().endswith(".json")
                     else None
                 )
             ]
@@ -59,11 +59,11 @@ class BackupConfig:
         self.uuid = uuid
 
     def watchdog(self, callback, config=None, text_ctrl=None):
-        if self.config_path is not None:
+        if self.config_file is not None:
             while self.uuid not in callback.stop_queue and self.continue_running:
                 sleep(self.interval)
                 if watchdog(
-                    self.config_path, text_ctrl, self.use_prompt, self.first_run
+                    self.config_file, text_ctrl, self.use_prompt, self.first_run
                 ) or basename(self.stop_backup_file).lower() in get_files_in_lower_case(
                     apply_working_directory(".")
                 ):
