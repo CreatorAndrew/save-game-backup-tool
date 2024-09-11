@@ -14,7 +14,6 @@ from wx import (
     ALL,
     BoxSizer,
     Button,
-    CallAfter,
     DEFAULT_FRAME_STYLE,
     EVT_BUTTON,
     EVT_CLOSE,
