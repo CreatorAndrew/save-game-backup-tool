@@ -1,3 +1,5 @@
+# pyright: reportMissingModuleSource=false, reportUndefinedVariable=false
+
 from __future__ import absolute_import
 from __future__ import print_function
 from sys import platform, stdout
@@ -21,7 +23,7 @@ class TempHistory:
         self.line = "\n"
         self.builtin_print = print
         try:
-            self.builtin_input = raw_input
+            self.builtin_input = raw_input  # noqa F821
         except:
             self.builtin_input = input
 

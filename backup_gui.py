@@ -1,5 +1,10 @@
 from __future__ import absolute_import
 from __future__ import division
+from gi import require_version
+
+require_version("Gtk", "3.0")
+require_version("AppIndicator3", "0.1")
+from gi.repository import AppIndicator3, GObject, Gtk
 from io import open
 from json import load
 from sys import platform
@@ -9,17 +14,16 @@ from wx import (
     ALL,
     BoxSizer,
     Button,
+    CallAfter,
     DEFAULT_FRAME_STYLE,
     EVT_BUTTON,
     EVT_CLOSE,
-    EVT_MENU,
     EXPAND,
     FIXED_MINSIZE,
     Frame,
     GridSizer,
     Icon,
     ID_ANY,
-    Menu,
     Panel,
     ScrolledWindow,
     StaticText,
@@ -28,19 +32,22 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
-from wx.adv import TaskBarIcon
 from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
+APPINDICATOR_ID = "Save Game Backup Tool"
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 HEIGHT = 384
+HIDDEN_LABEL = "Show"
+SHOWN_LABEL = "Hide"
 WIDTH = 512
 
 
 class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
+
         for config in data["configurations"]:
             config["uuid"] = uuid4()
         self.backup_configs = {}
@@ -54,7 +61,6 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
-        self.tray_icon = BackupTrayIcon(self)
         self.SetTitle("Save Game Backup Tool")
         if platform != "darwin":
             self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
@@ -93,6 +99,9 @@ class BackupGUI(Frame):
         for button in self.buttons.values():
             button.Bind(EVT_BUTTON, self.handle_button)
         self.Bind(EVT_CLOSE, self.on_close)
+        self.Show(
+            True if data.get("startMinimized") is None else not data["startMinimized"]
+        )
 
     def handle_button(self, event):
         config = self.configs[event.GetEventObject().GetId()]
@@ -103,11 +112,12 @@ class BackupGUI(Frame):
             add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, event):
+        self.toggle_shown_item.set_label(HIDDEN_LABEL)
         self.Hide()
 
     def exit(self):
         remove_all_configs(self, self.text_ctrl)
-        self.tray_icon.Destroy()
+        self.Hide()
         self.Destroy()
 
     def remove_config(self, config):
@@ -115,38 +125,48 @@ class BackupGUI(Frame):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
 
 
-class BackupTrayIcon(TaskBarIcon):
-    def __init__(self, frame):
-        TaskBarIcon.__init__(self)
-        self.frame = frame
-        self.SetIcon(
-            Icon(
-                apply_working_directory(
-                    (
-                        "./Save Game Backup Tool.app/Contents/Resources/"
-                        if platform == "darwin"
-                        else "./"
-                    )
-                    + "BackupTool.ico"
+class BackupTrayIcon:
+    def __init__(self):
+        self.frame = BackupGUI(None, ID_ANY)
+        indicator = AppIndicator3.Indicator.new(
+            APPINDICATOR_ID,
+            apply_working_directory(
+                (
+                    "./Save Game Backup Tool.app/Contents/Resources/"
+                    if platform == "darwin"
+                    else "./"
                 )
+                + "BackupTool.ico"
             ),
-            "Save Game Backup Tool",
+            AppIndicator3.IndicatorCategory.SYSTEM_SERVICES,
         )
-        self.Bind(EVT_MENU, self.on_tray_change_shown, id=1)
-        self.Bind(EVT_MENU, self.on_tray_close, id=2)
+        indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+        indicator.set_menu(self.build_menu())
+        self.frame.toggle_shown_item = self.toggle_shown_item
+        Gtk.main()
 
-    def CreatePopupMenu(self):
-        menu = Menu()
-        menu.Append(1, "Hide" if self.frame.IsShown() else "Show")
-        menu.Append(2, "Exit")
-
+    def build_menu(self):
+        menu = Gtk.Menu()
+        self.toggle_shown_item = Gtk.MenuItem(
+            "Hide" if self.frame.IsShown() else "Show"
+        )
+        exit_item = Gtk.MenuItem("Exit")
+        self.toggle_shown_item.connect("activate", self.on_tray_toggle_shown)
+        exit_item.connect("activate", self.on_tray_exit)
+        menu.append(self.toggle_shown_item)
+        menu.append(exit_item)
+        menu.show_all()
         return menu
 
-    def on_tray_change_shown(self, event):
+    def on_tray_exit(self, _):
+        timeout = self.frame.interval
+        self.frame.exit()
+        GObject.timeout_add(int(timeout * 1000), Gtk.main_quit)
+
+    def on_tray_toggle_shown(self, _):
         if self.frame.IsShown():
+            self.toggle_shown_item.set_label(HIDDEN_LABEL)
             self.frame.Hide()
         else:
+            self.toggle_shown_item.set_label(SHOWN_LABEL)
             self.frame.Show()
-
-    def on_tray_close(self, event):
-        self.frame.exit()
