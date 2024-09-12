@@ -71,7 +71,10 @@ class BackupGUI(Frame):
         self.configs = data["configurations"]
         self.configs_used = []
         self.stop_queue = []
-        self.hide_on_close = data["hideOnClose"]
+        try:
+            self.hide_on_close = data["hideOnClose"]
+        except:
+            self.hide_on_close = False
         try:
             self.interval = data["interval"]
         except:
