@@ -40,7 +40,6 @@ try:
 except:
     from wx import EVT_MENU, Menu
 
-APP_INDICATOR_ID = "Save Game Backup Tool"
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 EXIT_LABEL = "Exit"
@@ -55,6 +54,7 @@ TRAY_ICON_PATH = apply_working_directory(
 )
 HIDDEN_LABEL = "Show"
 SHOWN_LABEL = "Hide"
+TITLE = "Save Game Backup Tool"
 WIDTH = 512
 
 
@@ -76,7 +76,7 @@ class BackupGUI(Frame):
         Frame.__init__(self, *args, **kwds)
         if platform != "linux":
             self.tray_icon = BackupTrayIcon(self)
-        self.SetTitle("Save Game Backup Tool")
+        self.SetTitle(TITLE)
         if platform != "darwin":
             self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
         panel = Panel(self, ID_ANY)
@@ -149,7 +149,7 @@ class BackupTrayIcon(TaskBarIcon):
     def __init__(self, frame):
         TaskBarIcon.__init__(self)
         self.frame = frame
-        self.SetIcon(Icon(TRAY_ICON_PATH), APP_INDICATOR_ID)
+        self.SetIcon(Icon(TRAY_ICON_PATH), TITLE)
         self.Bind(EVT_MENU, self.on_tray_exit, id=1)
         self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
 
@@ -173,7 +173,7 @@ class BackupToolGTK:
     def __init__(self):
         self.frame = BackupGUI(None, ID_ANY)
         indicator = AppIndicator3.Indicator.new(
-            APP_INDICATOR_ID,
+            TITLE,
             TRAY_ICON_PATH,
             AppIndicator3.IndicatorCategory.SYSTEM_SERVICES,
         )
