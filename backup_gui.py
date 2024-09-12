@@ -27,6 +27,7 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
+from wx.adv import TaskBarIcon
 from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
@@ -38,7 +39,6 @@ try:
     from gi.repository import AppIndicator3, GObject, Gtk
 except:
     from wx import EVT_MENU, Menu
-    from wx.adv import TaskBarIcon
 
 APP_INDICATOR_ID = "Save Game Backup Tool"
 DISABLED_LABEL = "Start"
