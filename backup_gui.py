@@ -118,6 +118,13 @@ class BackupGUI(Frame):
             True if data.get("startMinimized") is None else not data["startMinimized"]
         )
 
+    def exit(self):
+        remove_all_configs(self, self.text_ctrl)
+        self.Hide()
+        if platform != "linux":
+            self.tray_icon.Destroy()
+        self.Destroy()
+
     def handle_button(self, event):
         config = self.configs[event.GetEventObject().GetId()]
         if config["uuid"] in self.configs_used:
@@ -126,19 +133,12 @@ class BackupGUI(Frame):
             self.buttons[config["uuid"]].SetLabel(ENABLED_LABEL)
             add_config(self, config, self.interval, self.text_ctrl)
 
-    def on_close(self, event):
+    def on_close(self, _):
         try:
             self.toggle_shown_item.set_label(HIDDEN_LABEL)
         except:
             pass
         self.Hide()
-
-    def exit(self):
-        remove_all_configs(self, self.text_ctrl)
-        self.Hide()
-        if platform != "linux":
-            self.tray_icon.Destroy()
-        self.Destroy()
 
     def remove_config(self, config):
         self.buttons[config["uuid"]].SetLabel(DISABLED_LABEL)
@@ -161,10 +161,10 @@ class BackupTrayIcon(TaskBarIcon):
 
         return menu
 
-    def on_tray_exit(self, event):
+    def on_tray_exit(self, _):
         self.frame.exit()
 
-    def on_tray_toggle_shown(self, event):
+    def on_tray_toggle_shown(self, _):
         if self.frame.IsShown():
             self.frame.Hide()
         else:
