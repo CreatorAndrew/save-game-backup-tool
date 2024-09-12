@@ -40,6 +40,10 @@ try:
 except:
     from wx import EVT_MENU, Menu
 
+    HAS_GTK = False
+else:
+    HAS_GTK = True
+
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 EXIT_LABEL = "Exit"
@@ -74,7 +78,7 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
-        if platform != "linux":
+        if not HAS_GTK:
             self.tray_icon = BackupTrayIcon(self)
         self.SetTitle(TITLE)
         if platform != "darwin":
@@ -121,7 +125,7 @@ class BackupGUI(Frame):
     def exit(self):
         remove_all_configs(self, self.text_ctrl)
         self.Hide()
-        if platform != "linux":
+        if not HAS_GTK:
             self.tray_icon.Destroy()
         self.Destroy()
 
@@ -134,10 +138,8 @@ class BackupGUI(Frame):
             add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, _):
-        try:
+        if HAS_GTK:
             self.toggle_shown_item.set_label(HIDDEN_LABEL)
-        except:
-            pass
         self.Hide()
 
     def remove_config(self, config):
@@ -196,9 +198,8 @@ class BackupToolGTK:
         return menu
 
     def on_tray_exit(self, _):
-        timeout = self.frame.interval
         self.frame.exit()
-        GObject.timeout_add(int(timeout * 1000), Gtk.main_quit)
+        GObject.timeout_add(int(self.frame.interval * 1000), Gtk.main_quit)
 
     def on_tray_toggle_shown(self, _):
         if self.frame.IsShown():
