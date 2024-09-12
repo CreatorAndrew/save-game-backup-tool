@@ -43,6 +43,7 @@ except:
 APP_INDICATOR_ID = "Save Game Backup Tool"
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
+EXIT_LABEL = "Exit"
 HEIGHT = 384
 TRAY_ICON_PATH = apply_working_directory(
     (
@@ -154,8 +155,8 @@ class BackupTrayIcon(TaskBarIcon):
 
     def CreatePopupMenu(self):
         menu = Menu()
-        menu.Append(2, "Hide" if self.frame.IsShown() else "Show")
-        menu.Append(1, "Exit")
+        menu.Append(2, SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL)
+        menu.Append(1, EXIT_LABEL)
         return menu
 
     def on_tray_exit(self, _):
@@ -184,9 +185,9 @@ class BackupToolGTK:
     def build_menu(self):
         menu = Gtk.Menu()
         self.toggle_shown_item = Gtk.MenuItem(
-            "Hide" if self.frame.IsShown() else "Show"
+            SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL
         )
-        exit_item = Gtk.MenuItem("Exit")
+        exit_item = Gtk.MenuItem(EXIT_LABEL)
         self.toggle_shown_item.connect("activate", self.on_tray_toggle_shown)
         exit_item.connect("activate", self.on_tray_exit)
         menu.append(self.toggle_shown_item)
