@@ -44,6 +44,9 @@ DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 EXIT_LABEL = "Exit"
 HEIGHT = 384
+HIDDEN_LABEL = "Show"
+SHOWN_LABEL = "Hide"
+TITLE = "Save Game Backup Tool"
 TRAY_ICON_PATH = apply_working_directory(
     (
         "./Save Game Backup Tool.app/Contents/Resources/"
@@ -52,9 +55,6 @@ TRAY_ICON_PATH = apply_working_directory(
     )
     + "BackupTool.ico"
 )
-HIDDEN_LABEL = "Show"
-SHOWN_LABEL = "Hide"
-TITLE = "Save Game Backup Tool"
 WIDTH = 512
 
 
