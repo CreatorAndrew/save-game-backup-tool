@@ -27,7 +27,7 @@ from wx import (
     TextCtrl,
     VERTICAL,
 )
-from wx.adv import TaskBarIcon
+from wx.adv import TaskBarIcon, EVT_TASKBAR_LEFT_UP
 from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
@@ -147,30 +147,6 @@ class BackupGUI(Frame):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
 
 
-class BackupTrayIcon(TaskBarIcon):
-    def __init__(self, frame):
-        TaskBarIcon.__init__(self)
-        self.frame = frame
-        self.SetIcon(Icon(TRAY_ICON_PATH), TITLE)
-        self.Bind(EVT_MENU, self.on_tray_exit, id=1)
-        self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
-
-    def CreatePopupMenu(self):
-        menu = Menu()
-        menu.Append(2, SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL)
-        menu.Append(1, EXIT_LABEL)
-        return menu
-
-    def on_tray_exit(self, _):
-        self.frame.exit()
-
-    def on_tray_toggle_shown(self, _):
-        if self.frame.IsShown():
-            self.frame.Hide()
-        else:
-            self.frame.Show()
-
-
 class BackupToolGUI:
     def __init__(self, app):
         self.frame = BackupGUI(None, ID_ANY)
@@ -211,3 +187,34 @@ class BackupToolGUI:
         else:
             self.toggle_shown_item.set_label(SHOWN_LABEL)
             self.frame.Show()
+
+
+class BackupTrayIcon(TaskBarIcon):
+    def __init__(self, frame):
+        TaskBarIcon.__init__(self)
+        self.frame = frame
+        self.SetIcon(Icon(TRAY_ICON_PATH), TITLE)
+        self.Bind(EVT_MENU, self.on_tray_exit, id=1)
+        self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
+        self.Bind(EVT_TASKBAR_LEFT_UP, self.on_tray_activate)
+
+    def CreatePopupMenu(self):
+        return self.tray_icon_menu()
+
+    def on_tray_activate(self, _):
+        self.PopupMenu(self.tray_icon_menu())
+
+    def on_tray_exit(self, _):
+        self.frame.exit()
+
+    def on_tray_toggle_shown(self, _):
+        if self.frame.IsShown():
+            self.frame.Hide()
+        else:
+            self.frame.Show()
+
+    def tray_icon_menu(self):
+        menu = Menu()
+        menu.Append(2, SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL)
+        menu.Append(1, EXIT_LABEL)
+        return menu
