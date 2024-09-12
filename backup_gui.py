@@ -35,8 +35,7 @@ try:
     from gi import require_version
 
     require_version("Gtk", "3.0")
-    require_version("AppIndicator3", "0.1")
-    from gi.repository import AppIndicator3, GObject, Gtk
+    from gi.repository import GObject, Gtk
 
     HAS_GTK = True
 except:
@@ -72,6 +71,7 @@ class BackupGUI(Frame):
         self.configs = data["configurations"]
         self.configs_used = []
         self.stop_queue = []
+        self.hide_on_close = data["hideOnClose"]
         try:
             self.interval = data["interval"]
         except:
@@ -118,9 +118,7 @@ class BackupGUI(Frame):
         for button in self.buttons.values():
             button.Bind(EVT_BUTTON, self.handle_button)
         self.Bind(EVT_CLOSE, self.on_close)
-        self.Show(
-            True if data.get("startMinimized") is None else not data["startMinimized"]
-        )
+        self.Show(True if data.get("startHidden") is None else not data["startHidden"])
 
     def exit(self):
         remove_all_configs(self, self.text_ctrl)
@@ -128,6 +126,8 @@ class BackupGUI(Frame):
         if not HAS_GTK:
             self.tray_icon.Destroy()
         self.Destroy()
+        if HAS_GTK:
+            GObject.timeout_add(int(self.interval * 1000), Gtk.main_quit)
 
     def handle_button(self, event):
         config = self.configs[event.GetEventObject().GetId()]
@@ -140,7 +140,10 @@ class BackupGUI(Frame):
     def on_close(self, _):
         if HAS_GTK:
             self.toggle_shown_item.set_label(HIDDEN_LABEL)
-        self.Hide()
+        if self.hide_on_close:
+            self.Hide()
+        else:
+            self.exit()
 
     def remove_config(self, config):
         self.buttons[config["uuid"]].SetLabel(DISABLED_LABEL)
@@ -151,13 +154,13 @@ class BackupToolGUI:
     def __init__(self, app):
         self.frame = BackupGUI(None, ID_ANY)
         try:
-            indicator = AppIndicator3.Indicator.new(
-                TITLE,
-                TRAY_ICON_PATH,
-                AppIndicator3.IndicatorCategory.SYSTEM_SERVICES,
-            )
-            indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-            indicator.set_menu(self.build_menu())
+            tray_icon = Gtk.StatusIcon()
+            tray_icon.set_from_file(TRAY_ICON_PATH)
+            tray_icon.set_tooltip_text(TITLE)
+            tray_icon.set_visible(True)
+            tray_icon.connect("activate", self.on_tray_toggle_shown)
+            tray_icon.connect("popup-menu", self.on_tray_menu_popup)
+            self.menu = self.build_menu()
             self.frame.toggle_shown_item = self.toggle_shown_item
             Gtk.main()
         except:
@@ -178,15 +181,15 @@ class BackupToolGUI:
 
     def on_tray_exit(self, _):
         self.frame.exit()
-        GObject.timeout_add(int(self.frame.interval * 1000), Gtk.main_quit)
+
+    def on_tray_menu_popup(self, _, button, time):
+        self.menu.popup(None, None, None, None, button, time)
 
     def on_tray_toggle_shown(self, _):
-        if self.frame.IsShown():
-            self.toggle_shown_item.set_label(HIDDEN_LABEL)
-            self.frame.Hide()
-        else:
-            self.toggle_shown_item.set_label(SHOWN_LABEL)
-            self.frame.Show()
+        self.toggle_shown_item.set_label(
+            HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
+        )
+        self.frame.Show(not self.frame.IsShown())
 
 
 class BackupTrayIcon(TaskBarIcon):
@@ -196,7 +199,7 @@ class BackupTrayIcon(TaskBarIcon):
         self.SetIcon(Icon(TRAY_ICON_PATH), TITLE)
         self.Bind(EVT_MENU, self.on_tray_exit, id=1)
         self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
-        self.Bind(EVT_TASKBAR_LEFT_UP, self.on_tray_activate)
+        self.Bind(EVT_TASKBAR_LEFT_UP, self.on_tray_toggle_shown)
 
     def build_menu(self):
         menu = Menu()
@@ -207,14 +210,8 @@ class BackupTrayIcon(TaskBarIcon):
     def CreatePopupMenu(self):
         return self.build_menu()
 
-    def on_tray_activate(self, _):
-        self.PopupMenu(self.build_menu())
-
     def on_tray_exit(self, _):
         self.frame.exit()
 
     def on_tray_toggle_shown(self, _):
-        if self.frame.IsShown():
-            self.frame.Hide()
-        else:
-            self.frame.Show()
+        self.frame.Show(not self.frame.IsShown())
