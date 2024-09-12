@@ -171,8 +171,8 @@ class BackupTrayIcon(TaskBarIcon):
             self.frame.Show()
 
 
-class BackupToolGTK:
-    def __init__(self):
+class BackupToolGUI:
+    def __init__(self, app):
         self.frame = BackupGUI(None, ID_ANY)
         try:
             indicator = AppIndicator3.Indicator.new(
@@ -180,12 +180,12 @@ class BackupToolGTK:
                 TRAY_ICON_PATH,
                 AppIndicator3.IndicatorCategory.SYSTEM_SERVICES,
             )
+            indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+            indicator.set_menu(self.build_menu())
+            self.frame.toggle_shown_item = self.toggle_shown_item
+            Gtk.main()
         except:
-            self.frame.exit()
-        indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-        indicator.set_menu(self.build_menu())
-        self.frame.toggle_shown_item = self.toggle_shown_item
-        Gtk.main()
+            app.MainLoop()
 
     def build_menu(self):
         menu = Gtk.Menu()

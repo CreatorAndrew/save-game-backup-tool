@@ -143,15 +143,9 @@ class BackupTool(App):
                 )
                 self.backup_threads[0].start()
         else:
-            try:
-                from backup_gui import BackupToolGTK
+            from backup_gui import BackupToolGUI
 
-                BackupToolGTK()
-            except:
-                from backup_gui import BackupGUI
-
-                BackupGUI(None, -1)
-                self.MainLoop()
+            BackupToolGUI(self)
 
     def remove_config(self, config):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
