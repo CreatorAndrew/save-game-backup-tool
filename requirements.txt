@@ -3,7 +3,6 @@ macholib==1.16.3
 packaging==24.1
 pefile==2023.2.7
 pillow==10.3.0
-PyGObject==3.48.2; sys_platform != "linux"
 pyinstaller==6.9.0
 pyinstaller-hooks-contrib==2024.7
 pyobjc==10.3.1; sys_platform == "darwin"

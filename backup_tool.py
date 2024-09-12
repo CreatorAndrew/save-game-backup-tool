@@ -1,5 +1,4 @@
 # pyright: reportMissingImports=false
-
 from __future__ import absolute_import
 from __future__ import print_function
 from io import open
@@ -10,9 +9,13 @@ from threading import Thread
 from uuid import uuid4
 from wx import App
 from backup_config import add_config, BackupConfig, remove_all_configs, remove_config
-from backup_gui import BackupTrayIcon
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
+
+if platform == "linux":
+    from backup_gui import BackupToolGTK
+else:
+    from backup_gui import BackupGUI
 
 if platform == "darwin":
     from AppKit import NSBundle
@@ -143,7 +146,11 @@ class BackupTool(App):
                 )
                 self.backup_threads[0].start()
         else:
-            BackupTrayIcon()
+            try:
+                BackupGUI(None, -1, "wx.adv - TaskBarIcon")
+                self.MainLoop()
+            except:
+                BackupToolGTK()
 
     def remove_config(self, config):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)

@@ -1,10 +1,6 @@
+# pyright: reportMissingImports=false
 from __future__ import absolute_import
 from __future__ import division
-from gi import require_version
-
-require_version("Gtk", "3.0")
-require_version("AppIndicator3", "0.1")
-from gi.repository import AppIndicator3, GObject, Gtk
 from io import open
 from json import load
 from sys import platform
@@ -34,10 +30,28 @@ from wx import (
 from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
-APPINDICATOR_ID = "Save Game Backup Tool"
+try:
+    from gi import require_version
+
+    require_version("Gtk", "3.0")
+    require_version("AppIndicator3", "0.1")
+    from gi.repository import AppIndicator3, GObject, Gtk
+except:
+    from wx import EVT_MENU, Menu
+    from wx.adv import TaskBarIcon
+
+APP_INDICATOR_ID = "Save Game Backup Tool"
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 HEIGHT = 384
+TRAY_ICON_PATH = apply_working_directory(
+    (
+        "./Save Game Backup Tool.app/Contents/Resources/"
+        if platform == "darwin"
+        else "./"
+    )
+    + "BackupTool.ico"
+)
 HIDDEN_LABEL = "Show"
 SHOWN_LABEL = "Hide"
 WIDTH = 512
@@ -60,6 +74,8 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
+        if platform != "linux":
+            self.tray_icon = BackupTrayIcon(self)
         self.SetTitle("Save Game Backup Tool")
         if platform != "darwin":
             self.SetIcon(Icon(apply_working_directory("./BackupTool.ico")))
@@ -111,12 +127,17 @@ class BackupGUI(Frame):
             add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, event):
-        self.toggle_shown_item.set_label(HIDDEN_LABEL)
+        try:
+            self.toggle_shown_item.set_label(HIDDEN_LABEL)
+        except:
+            pass
         self.Hide()
 
     def exit(self):
         remove_all_configs(self, self.text_ctrl)
         self.Hide()
+        if platform != "linux":
+            self.tray_icon.Destroy()
         self.Destroy()
 
     def remove_config(self, config):
@@ -124,19 +145,38 @@ class BackupGUI(Frame):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)
 
 
-class BackupTrayIcon:
+class BackupTrayIcon(TaskBarIcon):
+    def __init__(self, frame):
+        TaskBarIcon.__init__(self)
+        self.frame = frame
+        self.SetIcon(Icon(TRAY_ICON_PATH), APP_INDICATOR_ID)
+
+        self.Bind(EVT_MENU, self.on_tray_exit, id=1)
+        self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
+
+    def CreatePopupMenu(self):
+        menu = Menu()
+        menu.Append(2, "Hide" if self.frame.IsShown() else "Show")
+        menu.Append(1, "Exit")
+
+        return menu
+
+    def on_tray_exit(self, event):
+        self.frame.exit()
+
+    def on_tray_toggle_shown(self, event):
+        if self.frame.IsShown():
+            self.frame.Hide()
+        else:
+            self.frame.Show()
+
+
+class BackupToolGTK:
     def __init__(self):
         self.frame = BackupGUI(None, ID_ANY)
         indicator = AppIndicator3.Indicator.new(
-            APPINDICATOR_ID,
-            apply_working_directory(
-                (
-                    "./Save Game Backup Tool.app/Contents/Resources/"
-                    if platform == "darwin"
-                    else "./"
-                )
-                + "BackupTool.ico"
-            ),
+            APP_INDICATOR_ID,
+            TRAY_ICON_PATH,
             AppIndicator3.IndicatorCategory.SYSTEM_SERVICES,
         )
         indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)

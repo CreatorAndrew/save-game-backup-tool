@@ -1,5 +1,4 @@
 # pyright: reportMissingModuleSource=false, reportUndefinedVariable=false
-
 from __future__ import absolute_import
 from __future__ import print_function
 from sys import platform, stdout
