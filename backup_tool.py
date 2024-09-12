@@ -145,7 +145,7 @@ class BackupTool(App):
             except:
                 from backup_gui import BackupGUI
 
-                BackupGUI(None, -1, "wx.adv - TaskBarIcon")
+                BackupGUI(None, -1)
                 self.MainLoop()
 
     def remove_config(self, config):
