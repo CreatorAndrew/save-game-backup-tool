@@ -12,11 +12,6 @@ from backup_config import add_config, BackupConfig, remove_all_configs, remove_c
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
 
-try:
-    from backup_gui import BackupToolGTK
-except:
-    from backup_gui import BackupGUI
-
 
 class BackupTool(App):
     def main(self):
@@ -144,10 +139,14 @@ class BackupTool(App):
                 self.backup_threads[0].start()
         else:
             try:
+                from backup_gui import BackupToolGTK
+
+                BackupToolGTK()
+            except:
+                from backup_gui import BackupGUI
+
                 BackupGUI(None, -1, "wx.adv - TaskBarIcon")
                 self.MainLoop()
-            except:
-                BackupToolGTK()
 
     def remove_config(self, config):
         remove_config(config, self.backup_configs, self.configs_used, self.stop_queue)

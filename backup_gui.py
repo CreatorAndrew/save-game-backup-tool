@@ -37,12 +37,12 @@ try:
     require_version("Gtk", "3.0")
     require_version("AppIndicator3", "0.1")
     from gi.repository import AppIndicator3, GObject, Gtk
+
+    HAS_GTK = True
 except:
     from wx import EVT_MENU, Menu
 
     HAS_GTK = False
-else:
-    HAS_GTK = True
 
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
@@ -173,7 +173,6 @@ class BackupTrayIcon(TaskBarIcon):
 
 class BackupToolGTK:
     def __init__(self):
-        self.frame = BackupGUI(None, ID_ANY)
         indicator = AppIndicator3.Indicator.new(
             TITLE,
             TRAY_ICON_PATH,
@@ -181,6 +180,7 @@ class BackupToolGTK:
         )
         indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         indicator.set_menu(self.build_menu())
+        self.frame = BackupGUI(None, ID_ANY)
         self.frame.toggle_shown_item = self.toggle_shown_item
         Gtk.main()
 
