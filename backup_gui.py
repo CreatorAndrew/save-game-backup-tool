@@ -150,7 +150,6 @@ class BackupTrayIcon(TaskBarIcon):
         TaskBarIcon.__init__(self)
         self.frame = frame
         self.SetIcon(Icon(TRAY_ICON_PATH), APP_INDICATOR_ID)
-
         self.Bind(EVT_MENU, self.on_tray_exit, id=1)
         self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
 
