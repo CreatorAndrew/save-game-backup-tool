@@ -198,11 +198,17 @@ class BackupTrayIcon(TaskBarIcon):
         self.Bind(EVT_MENU, self.on_tray_toggle_shown, id=2)
         self.Bind(EVT_TASKBAR_LEFT_UP, self.on_tray_activate)
 
+    def build_menu(self):
+        menu = Menu()
+        menu.Append(2, SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL)
+        menu.Append(1, EXIT_LABEL)
+        return menu
+
     def CreatePopupMenu(self):
-        return self.tray_icon_menu()
+        return self.build_menu()
 
     def on_tray_activate(self, _):
-        self.PopupMenu(self.tray_icon_menu())
+        self.PopupMenu(self.build_menu())
 
     def on_tray_exit(self, _):
         self.frame.exit()
@@ -212,9 +218,3 @@ class BackupTrayIcon(TaskBarIcon):
             self.frame.Hide()
         else:
             self.frame.Show()
-
-    def tray_icon_menu(self):
-        menu = Menu()
-        menu.Append(2, SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL)
-        menu.Append(1, EXIT_LABEL)
-        return menu
