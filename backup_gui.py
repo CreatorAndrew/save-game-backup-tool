@@ -60,7 +60,6 @@ WIDTH = 512
 class BackupGUI(Frame):
     def __init__(self, *args, **kwds):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
-
         for config in data["configurations"]:
             config["uuid"] = uuid4()
         self.backup_configs = {}
