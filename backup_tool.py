@@ -12,17 +12,22 @@ from backup_config import add_config, BackupConfig, remove_all_configs, remove_c
 from backup_utils import apply_working_directory, PROMPT
 from temp_history import TempHistory
 
+try:
+    from AppKit import NSBundle
+
+    bundle = NSBundle.mainBundle()
+    info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+    info["LSUIElement"] = "1"
+except:
+    pass
+
 
 class BackupTool(App):
     def main(self):
         data = load(open(apply_working_directory("./MasterConfig.json"), "r"))
         if platform == "darwin":
-            from AppKit import NSBundle
             from os import system
 
-            bundle = NSBundle.mainBundle()
-            info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-            info["LSUIElement"] = "1"
             system("clear")
         elif data.get("createShortcut") is not None and data["createShortcut"]:
             try:
