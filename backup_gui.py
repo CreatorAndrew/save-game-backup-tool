@@ -158,7 +158,6 @@ class BackupTrayIcon(TaskBarIcon):
         menu = Menu()
         menu.Append(2, "Hide" if self.frame.IsShown() else "Show")
         menu.Append(1, "Exit")
-
         return menu
 
     def on_tray_exit(self, _):
