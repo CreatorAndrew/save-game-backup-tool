@@ -39,6 +39,14 @@ try:
 
     HAS_GTK = True
 except:
+    try:
+        from PySide6.QtCore import QPoint
+        from PySide6.QtGui import QAction, QIcon
+        from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+    except:
+        HAS_QT = False
+    else:
+        HAS_QT = True
     from wx import EVT_MENU, Menu
 
     HAS_GTK = False
@@ -81,7 +89,7 @@ class BackupGUI(Frame):
             self.interval = 0
         kwds["style"] = kwds.get("style", 0) | DEFAULT_FRAME_STYLE
         Frame.__init__(self, *args, **kwds)
-        if not HAS_GTK:
+        if not (HAS_GTK or HAS_QT):
             self.tray_icon = BackupTrayIcon(self)
         self.SetTitle(TITLE)
         if platform != "darwin":
@@ -126,11 +134,13 @@ class BackupGUI(Frame):
     def exit(self):
         remove_all_configs(self, self.text_ctrl)
         self.Hide()
-        if not HAS_GTK:
+        if not (HAS_GTK or HAS_QT):
             self.tray_icon.Destroy()
         self.Destroy()
         if HAS_GTK:
             GObject.timeout_add(int(self.interval * 1000), Gtk.main_quit)
+        if HAS_QT:
+            self.app.quit()
 
     def handle_button(self, event):
         config = self.configs[event.GetEventObject().GetId()]
@@ -141,7 +151,7 @@ class BackupGUI(Frame):
             add_config(self, config, self.interval, self.text_ctrl)
 
     def on_close(self, _):
-        if HAS_GTK:
+        if HAS_GTK or HAS_QT:
             self.toggle_shown_item.set_label(HIDDEN_LABEL)
         if self.hide_on_close:
             self.Hide()
@@ -156,31 +166,58 @@ class BackupGUI(Frame):
 class BackupToolGUI:
     def __init__(self, app):
         self.frame = BackupGUI(None, ID_ANY)
-        try:
+        if HAS_GTK:
             tray_icon = Gtk.StatusIcon()
             tray_icon.set_from_file(TRAY_ICON_PATH)
             tray_icon.set_tooltip_text(TITLE)
             tray_icon.set_visible(True)
             tray_icon.connect("activate", self.on_tray_toggle_shown)
             tray_icon.connect("popup-menu", self.on_tray_menu_popup)
-            self.menu = self.build_menu()
+            self.toggle_shown_item = Gtk.MenuItem(
+                SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL
+            )
+            self.toggle_shown_item.connect("activate", self.on_tray_toggle_shown)
+            exit_item = Gtk.MenuItem(EXIT_LABEL)
+            exit_item.connect("activate", self.on_tray_exit)
+            self.menu = Gtk.Menu()
+            self.menu.append(self.toggle_shown_item)
+            self.menu.append(exit_item)
+            self.menu.show_all()
             self.frame.toggle_shown_item = self.toggle_shown_item
             Gtk.main()
-        except:
-            app.MainLoop()
+            return
+        if HAS_QT:
+            self.frame.app = QApplication([])
+            self.frame.app.setQuitOnLastWindowClosed(False)
+            self.tray_icon = QSystemTrayIcon()
+            self.tray_icon.setIcon(QIcon(TRAY_ICON_PATH))
+            self.tray_icon.setToolTip(TITLE)
+            self.tray_icon.setVisible(True)
+            self.tray_icon.activated.connect(self.handle_tray_icon)
+            self.toggle_shown_item = QAction(
+                SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL
+            )
+            self.toggle_shown_item.triggered.connect(self.on_tray_toggle_shown)
+            self.toggle_shown_item.set_label = self.toggle_shown_item.setText
+            exit_item = QAction(EXIT_LABEL)
+            exit_item.triggered.connect(self.on_tray_exit)
+            self.menu = QMenu()
+            self.menu.addAction(self.toggle_shown_item)
+            self.menu.addAction(exit_item)
+            self.frame.toggle_shown_item = self.toggle_shown_item
+        app.MainLoop()
 
-    def build_menu(self):
-        menu = Gtk.Menu()
-        self.toggle_shown_item = Gtk.MenuItem(
-            SHOWN_LABEL if self.frame.IsShown() else HIDDEN_LABEL
-        )
-        exit_item = Gtk.MenuItem(EXIT_LABEL)
-        self.toggle_shown_item.connect("activate", self.on_tray_toggle_shown)
-        exit_item.connect("activate", self.on_tray_exit)
-        menu.append(self.toggle_shown_item)
-        menu.append(exit_item)
-        menu.show_all()
-        return menu
+    def handle_tray_icon(self, reason):
+        if reason == QSystemTrayIcon.Trigger:
+            self.toggle_shown_item.setText(
+                HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
+            )
+            self.frame.Show(not self.frame.IsShown())
+        if reason == QSystemTrayIcon.Context:
+            point = QPoint()
+            point.setX(self.tray_icon.geometry().x())
+            point.setY(self.tray_icon.geometry().y())
+            self.menu.popup(point)
 
     def on_tray_exit(self, _):
         self.frame.exit()
