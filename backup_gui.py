@@ -43,12 +43,12 @@ except:
         from PySide6.QtCore import QPoint
         from PySide6.QtGui import QAction, QIcon
         from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
-    except:
-        HAS_QT = False
-    else:
-        HAS_QT = True
-    from wx import EVT_MENU, Menu
 
+        HAS_QT = True
+    except:
+        from wx import EVT_MENU, Menu
+
+        HAS_QT = False
     HAS_GTK = False
 
 DISABLED_LABEL = "Start"
