@@ -32,6 +32,11 @@ from backup_config import add_config, remove_all_configs, remove_config
 from backup_utils import apply_working_directory
 
 try:
+    from AppKit import NSApp, NSApplication
+except:
+    pass
+
+try:
     from gi import require_version
 
     require_version("Gtk", "3.0")
@@ -67,6 +72,14 @@ TRAY_ICON_PATH = apply_working_directory(
     + "BackupTool.ico"
 )
 WIDTH = 512
+
+
+def go_foreground():
+    try:
+        NSApplication.sharedApplication()
+        NSApp().activateIgnoringOtherApps_(True)
+    except:
+        pass
 
 
 class BackupGUI(Frame):
@@ -213,6 +226,7 @@ class BackupToolGUI:
                 HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
             )
             self.frame.Show(not self.frame.IsShown())
+            go_foreground()
         if reason == QSystemTrayIcon.Context:
             point = QPoint()
             point.setX(self.tray_icon.geometry().x())
@@ -230,6 +244,7 @@ class BackupToolGUI:
             HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
         )
         self.frame.Show(not self.frame.IsShown())
+        go_foreground()
 
 
 class BackupTrayIcon(TaskBarIcon):
@@ -255,3 +270,4 @@ class BackupTrayIcon(TaskBarIcon):
 
     def on_tray_toggle_shown(self, _):
         self.frame.Show(not self.frame.IsShown())
+        go_foreground()
