@@ -35,7 +35,6 @@ try:
     from AppKit import NSApp, NSApplication
 except:
     pass
-
 try:
     from gi import require_version
 
@@ -55,7 +54,6 @@ except:
 
         HAS_QT = False
     HAS_GTK = False
-
 DISABLED_LABEL = "Start"
 ENABLED_LABEL = "Stop"
 EXIT_LABEL = "Exit"
