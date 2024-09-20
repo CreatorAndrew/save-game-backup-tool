@@ -42,6 +42,7 @@ try:
     from gi.repository import GObject, Gtk
 
     HAS_GTK = True
+    HAS_QT = False
 except:
     try:
         from PySide6.QtCore import QPoint
