@@ -73,12 +73,12 @@ TRAY_ICON_PATH = apply_working_directory(
 WIDTH = 512
 
 
-def go_foreground(frame: Frame = None):
+def go_foreground(frame: Frame):
     try:
         NSApplication.sharedApplication()
         NSApp().activateIgnoringOtherApps_(True)
     except:
-        if frame is not None and frame.IsShown():
+        if frame.IsShown():
             frame.Raise()
 
 
@@ -226,7 +226,7 @@ class BackupToolGUI:
                 HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
             )
             self.frame.Show(not self.frame.IsShown())
-            go_foreground()
+            go_foreground(self.frame)
         if reason == QSystemTrayIcon.Context:
             point = QPoint()
             point.setX(self.tray_icon.geometry().x())
