@@ -73,12 +73,13 @@ TRAY_ICON_PATH = apply_working_directory(
 WIDTH = 512
 
 
-def go_foreground():
+def go_foreground(frame: Frame = None):
     try:
         NSApplication.sharedApplication()
         NSApp().activateIgnoringOtherApps_(True)
     except:
-        pass
+        if frame is not None and frame.IsShown():
+            frame.Raise()
 
 
 class BackupGUI(Frame):
@@ -243,7 +244,7 @@ class BackupToolGUI:
             HIDDEN_LABEL if self.frame.IsShown() else SHOWN_LABEL
         )
         self.frame.Show(not self.frame.IsShown())
-        go_foreground()
+        go_foreground(self.frame)
 
 
 class BackupTrayIcon(TaskBarIcon):
@@ -269,4 +270,4 @@ class BackupTrayIcon(TaskBarIcon):
 
     def on_tray_toggle_shown(self, _):
         self.frame.Show(not self.frame.IsShown())
-        go_foreground()
+        go_foreground(self.frame)
