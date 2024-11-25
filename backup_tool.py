@@ -4,6 +4,7 @@ from __future__ import print_function
 from io import open
 from json import load
 from os import listdir
+from os.path import join
 from sys import argv, platform
 from threading import Thread
 from uuid import uuid4
@@ -62,16 +63,18 @@ class BackupTool(App):
                         Icon=(apply_working_directory("./BackupTool.exe"), 0),
                     )
 
-                try:
-                    create_shortcut_at(
-                        getenv("APPDATA")
-                        + "/Microsoft/Windows/Start Menu/Programs/Save Game Backup Tool.lnk"
+                shortcut_path = getenv("APPDATA")
+                if shortcut_path is None:
+                    shortcut_path = str(Path.home())
+                else:
+                    shortcut_path = (shortcut_path + "/Microsoft/Windows").replace(
+                        "\\", "/"
                     )
-                except:
-                    create_shortcut_at(
-                        str(Path.home())
-                        + "/Start Menu/Programs/Save Game Backup Tool.lnk"
-                    )
+                if len(shortcut_path) < 4:
+                    shortcut_path = "C:/Windows"
+                create_shortcut_at(
+                    shortcut_path + "/Start Menu/Programs/Save Game Backup Tool.lnk"
+                )
         self.backup_configs = {}
         self.backup_threads = []
         self.configs_used = []
