@@ -4,7 +4,6 @@ from __future__ import print_function
 from io import open
 from json import load
 from os import listdir
-from os.path import join
 from sys import argv, platform
 from threading import Thread
 from uuid import uuid4
