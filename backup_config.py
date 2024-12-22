@@ -7,26 +7,26 @@ from backup_utils import apply_working_directory, get_files_in_lower_case
 from backup_watchdog import watchdog
 
 
-def add_config(callback, config, interval, text_ctrl=None):
-    callback.configs_used.append(config["uuid"])
-    callback.backup_configs[config["uuid"]] = BackupConfig(
+def add_config(backup_tool, config, interval, text_ctrl=None):
+    backup_tool.configs_used.append(config["uuid"])
+    backup_tool.backup_configs[config["uuid"]] = BackupConfig(
         config["name"], config["uuid"], interval, True
     )
-    callback.backup_threads.append(
+    backup_tool.backup_threads.append(
         Thread(
-            target=callback.backup_configs[config["uuid"]].watchdog,
-            args=(callback, config, text_ctrl),
+            target=backup_tool.backup_configs[config["uuid"]].watchdog,
+            args=(backup_tool, config, text_ctrl),
         )
     )
-    callback.backup_threads[len(callback.backup_threads) - 1].start()
+    backup_tool.backup_threads[len(backup_tool.backup_threads) - 1].start()
 
 
-def remove_all_configs(callback, text_ctrl=None):
-    for uuid in callback.backup_configs.copy().keys():
+def remove_all_configs(backup_tool, text_ctrl=None):
+    for uuid in backup_tool.backup_configs.copy().keys():
         if text_ctrl is None:
-            callback.remove_config({"uuid": uuid})
+            backup_tool.remove_config({"uuid": uuid})
         else:
-            CallAfter(callback.remove_config, {"uuid": uuid})
+            CallAfter(backup_tool.remove_config, {"uuid": uuid})
 
 
 def remove_config(config, backup_configs, configs_used, stop_queue):
@@ -57,9 +57,9 @@ class BackupConfig:
         self.use_prompt = use_prompt
         self.uuid = uuid
 
-    def watchdog(self, callback, config=None, text_ctrl=None):
+    def watchdog(self, backup_tool, config=None, text_ctrl=None):
         if self.config_file is not None:
-            while self.uuid not in callback.stop_queue and self.continue_running:
+            while self.uuid not in backup_tool.stop_queue and self.continue_running:
                 sleep(self.interval)
                 if watchdog(
                     self.config_file, text_ctrl, self.use_prompt, self.first_run
@@ -78,9 +78,9 @@ class BackupConfig:
                     self.continue_running = False
                     if text_ctrl is None:
                         if config is not None:
-                            callback.remove_config(config)
+                            backup_tool.remove_config(config)
                     else:
-                        CallAfter(callback.remove_config, config)
+                        CallAfter(backup_tool.remove_config, config)
                 self.first_run = False
             self.first_run = True
             self.continue_running = False
